@@ -1,0 +1,8 @@
+[
+  {
+    "path": "/proxy/ext",
+    "env": "EXT_WMS_URL",
+    "default": "https://ows.terrestris.de/osm/service",
+    "stripPrefix": true
+  }
+]

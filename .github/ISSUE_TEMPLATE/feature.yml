@@ -1,0 +1,13 @@
+name: Feature request
+description: Propose a reusable mapping capability
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Concrete use case and desired behavior
+    validations:
+      required: true
+  - type: textarea
+    id: instance
+    attributes:
+      label: Could instance configuration or a plugin solve it?

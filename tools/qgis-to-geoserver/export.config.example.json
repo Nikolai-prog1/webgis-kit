@@ -1,0 +1,31 @@
+{
+  "group": "Demo",
+  "workspace": "demo",
+  "namespace": "https://example.com/demo",
+  "output_dir": "export",
+  "default_store": "demo-data",
+  "service_id": "main",
+  "stores": {
+    "demo-data": {
+      "type": "postgis",
+      "host": "localhost",
+      "port": 5432,
+      "database": "webgis",
+      "schema": "public",
+      "user": "webgis",
+      "passwordEnv": "POSTGRES_PASSWORD"
+    }
+  },
+  "layer_names": { "Cities": "cities" },
+  "native_names": {},
+  "layer_stores": {},
+  "group_names": {},
+  "exclude_layers": [],
+  "label_vendor_options": {
+    "group": "yes",
+    "maxDisplacement": 50,
+    "autoWrap": 25,
+    "goodnessOfFit": 0.5
+  },
+  "overwrite": false
+}

@@ -1,0 +1,28 @@
+{
+  "type": "FeatureCollection",
+  "attribution": "Synthetic demonstration data. CC0.",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Harbor East",
+        "population": 120000
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [12, 45]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hillview",
+        "population": 80000
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [14, 46]
+      }
+    }
+  ]
+}

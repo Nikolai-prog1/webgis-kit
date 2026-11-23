@@ -1,0 +1,92 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "geoserver-example",
+    "title": "GeoServer example",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "GeoServer example"
+  },
+  "map": {
+    "center": [12, 45],
+    "zoom": 4
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "cities",
+      "title": "Cities",
+      "geometry": "point",
+      "source": {
+        "type": "wms",
+        "service": "main",
+        "layers": "cities",
+        "tiled": true
+      },
+      "visible": true,
+      "table": true,
+      "fields": {
+        "name": {
+          "label": "Name"
+        },
+        "country": {
+          "label": "Country"
+        },
+        "population": {
+          "label": "Population",
+          "format": "number"
+        }
+      },
+      "popup": {
+        "title": "{name}"
+      }
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "data",
+      "title": "Map layers",
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        },
+        {
+          "type": "layer-list",
+          "layers": ["cities"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "cities",
+          "fields": ["name", "country"],
+          "label": "Find a city",
+          "showLayerOnSearch": true
+        }
+      ]
+    }
+  ],
+  "toolbar": ["home", "print", "clear"],
+  "services": {
+    "main": {
+      "type": "geoserver",
+      "url": "geoserver",
+      "workspace": "demo",
+      "title": "Local GeoServer",
+      "wmsVersion": "1.1.1",
+      "wfsVersion": "2.0.0"
+    }
+  }
+}

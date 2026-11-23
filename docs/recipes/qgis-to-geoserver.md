@@ -1,0 +1,5 @@
+# QGIS to SLD, catalog and GeoServer
+
+Use the parameterized exporter in `tools/qgis-to-geoserver`; its README and example config define groups, stores, names, exclusions, output directory, map-unit conversion and label options. Export outside the template and inspect warnings. Field-based single/category/range styles, hatches, labels, halos and scale bounds have synthetic QGIS coverage; unsupported symbols/expressions are reported rather than silently claimed identical.
+
+The manifest and generated catalog are separate outputs. Add the catalog to your private instance, validate it, then inspect the publisher's `--dry-run`. Actual publication uses explicit target/credential settings and may create stores/layers or update styles; it is a separate authorized operation. The publisher treats only 404 as missing, preserves existing stores, recalculates bounds and verifies image responses and feature counts. Integration against a live deployment needs your server; unit and dry-run checks cannot prove its permissions or installed fonts.

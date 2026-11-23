@@ -1,0 +1,48 @@
+name: Stack integration
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'stack/**'
+      - 'tools/import/**'
+      - 'tools/stack/**'
+      - 'tools/smoke.mjs'
+      - 'tests/e2e-live/**'
+      - '.github/workflows/stack.yml'
+permissions:
+  contents: read
+jobs:
+  docker-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: npm ci --include=dev
+      - run: npx playwright install --with-deps chromium
+      - run: npm run stack -- up --mode docker
+      - name: Import the neutral demo into the new stack
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const p='app/static/config/app.json'; const c=JSON.parse(fs.readFileSync(p)); c.app.locale='en'; c.basemaps.default='none'; fs.writeFileSync(p,JSON.stringify(c,null,2));"
+          npm run import -- examples/configs/demo/static/data/cities.geojson examples/configs/demo/static/data/rivers.geojson examples/configs/demo/static/data/countries.geojson --schema ci_import
+      - run: npm run smoke
+      - run: npx playwright test --project=imported
+        env:
+          WEBGIS_LIVE_GEOSERVER: '1'
+          WEBGIS_LIVE_INSTANCE: app
+      - if: always()
+        run: npm run stack -- logs
+      - if: always()
+        run: npm run stack -- down
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: stack-integration-results
+          path: test-results/

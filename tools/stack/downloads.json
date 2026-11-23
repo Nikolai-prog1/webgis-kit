@@ -1,0 +1,26 @@
+[
+  {
+    "id": "jdk",
+    "name": "OpenJDK21U-jdk_x64_windows_hotspot_21.0.13_9.zip",
+    "aliases": ["jdk21.zip"],
+    "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.13%2B9/OpenJDK21U-jdk_x64_windows_hotspot_21.0.13_9.zip",
+    "metadataUrl": "https://api.adoptium.net/v3/assets/version/21.0.13+9?architecture=x64&image_type=jdk&jvm_impl=hotspot&os=windows&vendor=eclipse",
+    "sha256": "a4dbaa05fca4bd89d84584e58c459bd732efebb1722af80ab13c6516832004f9"
+  },
+  {
+    "id": "geoserver",
+    "name": "geoserver-3.0.2-bin.zip",
+    "url": "https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-bin.zip/download"
+  },
+  {
+    "id": "postgresql",
+    "name": "postgresql-17.12-1-windows-x64-binaries.zip",
+    "aliases": ["postgresql-17.12-binaries.zip"],
+    "url": "https://get.enterprisedb.com/postgresql/postgresql-17.12-1-windows-x64-binaries.zip"
+  },
+  {
+    "id": "postgis",
+    "name": "postgis-bundle-pg17-3.7.0x64.zip",
+    "url": "https://download.osgeo.org/postgis/windows/pg17/postgis-bundle-pg17-3.7.0x64.zip"
+  }
+]

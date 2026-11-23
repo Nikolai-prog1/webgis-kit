@@ -1,0 +1,94 @@
+.wg-popover {
+  position: fixed;
+  width: min(340px, calc(100vw - 16px));
+  padding: 16px;
+  background: var(--wg-panel);
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius);
+  z-index: 15000;
+  box-shadow: var(--wg-shadow-soft);
+}
+.wg-form-error {
+  color: var(--wg-danger);
+  font-size: 12px;
+  margin-top: 8px;
+}
+.wg-measure-label {
+  background: #17655bef;
+  color: white;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: var(--wg-shadow-tight);
+}
+.wg-measure-label--finished {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 3px 2px 8px;
+  background: white;
+  color: var(--wg-accent-strong);
+  border-color: var(--wg-accent);
+}
+.wg-measure-remove {
+  min-height: 28px;
+  min-width: 28px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+  background: transparent;
+  border-color: transparent;
+}
+.wg-marker-card {
+  width: 255px;
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius);
+  background: var(--wg-panel);
+  padding: 9px 12px;
+  box-shadow: var(--wg-shadow-soft);
+}
+.wg-marker-card .wg-row {
+  justify-content: space-between;
+  font-size: 10px;
+  padding-bottom: 4px;
+}
+.wg-marker-card small {
+  display: block;
+}
+.wg-marker-card button {
+  min-height: 25px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+.wg-status__coordinates {
+  display: flex;
+  flex-direction: column;
+}
+.wg-status .ol-scale-bar,
+.wg-status .ol-scale-line {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  background: transparent;
+  color: var(--wg-text);
+}
+.wg-status .ol-scale-text {
+  position: static;
+  font-size: 9px;
+}
+.wg-status .ol-scale-step-text {
+  font-size: 9px;
+}
+.wg-status .ol-scale-bar {
+  padding: 0 8px 13px;
+}
+.wg-status .ol-scale-line-inner {
+  color: var(--wg-text);
+  border-color: var(--wg-text);
+  font-size: 10px;
+  margin: 1px 4px;
+}

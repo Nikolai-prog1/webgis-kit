@@ -1,0 +1,241 @@
+.wg-app {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.wg-header {
+  height: 72px;
+  flex: 0 0 72px;
+  background: var(--wg-panel);
+  border-bottom: 1px solid var(--wg-border);
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 20px;
+  z-index: 100;
+}
+.wg-brand {
+  flex: 0 0 268px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.wg-brand strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.wg-brand small {
+  color: var(--wg-muted);
+  font-size: 11px;
+  display: block;
+}
+.wg-brand a {
+  font-size: 10px;
+  display: block;
+}
+.wg-header__end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+.wg-header__link {
+  display: inline-flex;
+  align-items: center;
+}
+.wg-header__end select {
+  padding: 5px;
+}
+.wg-toolbar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+.wg-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-color: transparent;
+  background: transparent;
+  position: relative;
+  white-space: nowrap;
+}
+.wg-toolbar button[aria-pressed='true'] {
+  background: var(--wg-accent-soft);
+  color: var(--wg-accent-strong);
+}
+.wg-workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  position: relative;
+}
+.wg-sidebar {
+  width: 300px;
+  flex: 0 0 300px;
+  overflow: auto;
+  background: var(--wg-panel);
+  border-right: 1px solid var(--wg-border);
+  padding: 12px 14px 26px;
+  z-index: 50;
+}
+.wg-map {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  background: #e9efed;
+}
+.wg-section {
+  border-bottom: 1px solid var(--wg-border);
+}
+.wg-section__toggle {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 52px;
+  padding: 10px 4px;
+  font-weight: 600;
+  text-align: left;
+}
+.wg-section__toggle .ti:first-child {
+  color: var(--wg-accent);
+}
+.wg-section__toggle .ti:last-child {
+  margin-left: auto;
+  font-size: 16px;
+}
+.wg-section__toggle[aria-expanded='false'] .ti:last-child {
+  transform: rotate(-90deg);
+}
+.wg-section__body {
+  padding: 0 3px 16px;
+}
+.wg-block + .wg-block {
+  margin-top: 18px;
+}
+.wg-menu {
+  display: none;
+}
+.wg-status {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  z-index: 20;
+  background: #ffffffeb;
+  border: 1px solid var(--wg-border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10px;
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+}
+.wg-panels {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  overflow: hidden;
+}
+.wg-tasks {
+  position: absolute;
+  bottom: 35px;
+  left: 10px;
+  right: 10px;
+  z-index: 150;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: 5px;
+  pointer-events: none;
+}
+.wg-tasks button {
+  pointer-events: auto;
+  box-shadow: var(--wg-shadow-tight);
+}
+.ol-zoom {
+  top: 16px;
+  left: auto;
+  right: 16px;
+}
+.ol-attribution {
+  max-width: calc(100% - 20px);
+  font-size: 10px;
+}
+@media (max-width: 1250px) {
+  .wg-toolbar button span {
+    display: none;
+  }
+  .wg-brand {
+    flex-basis: 240px;
+  }
+  .wg-header {
+    gap: 10px;
+    padding: 0 14px;
+  }
+}
+@media (max-width: 720px) {
+  .wg-header {
+    height: 62px;
+    flex-basis: 62px;
+    padding: 0 8px;
+    gap: 8px;
+  }
+  .wg-brand {
+    flex: 1;
+    gap: 7px;
+  }
+  .wg-brand strong {
+    font-size: 14px;
+  }
+  .wg-brand small,
+  .wg-header__link {
+    display: none;
+  }
+  .wg-brand img {
+    width: 28px;
+    height: 28px;
+  }
+  .wg-menu {
+    display: block;
+  }
+  .wg-toolbar {
+    position: absolute;
+    top: 70px;
+    left: 10px;
+    right: 64px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid var(--wg-border);
+    border-radius: 8px;
+    justify-content: flex-start;
+    padding: 3px;
+    box-shadow: var(--wg-shadow-tight);
+  }
+  .wg-toolbar button {
+    padding: 6px;
+    min-height: 34px;
+  }
+  .wg-sidebar {
+    display: none;
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: min(320px, 90vw);
+    box-shadow: var(--wg-shadow-soft);
+    padding-top: 60px;
+  }
+  .wg-sidebar--open {
+    display: block;
+  }
+  .wg-status {
+    flex-direction: column;
+    gap: 0;
+  }
+}

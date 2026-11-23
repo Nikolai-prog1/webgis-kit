@@ -1,0 +1,18 @@
+import 'ol/ol.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/inter/cyrillic-400.css';
+import '@fontsource/inter/cyrillic-500.css';
+import '@fontsource/inter/cyrillic-600.css';
+import '@tabler/icons-webfont/dist/tabler-icons.min.css';
+import './core/styles/tokens.css';
+import './core/styles/base.css';
+import './core/styles/layout.css';
+import './core/styles/components/map.css';
+import './core/styles/components/panels.css';
+import './core/styles/components/catalog.css';
+import './core/styles/components/tools.css';
+import '@app/theme.css';
+import { createApp } from './core/app/createApp.js';
+createApp(document.getElementById('app'));

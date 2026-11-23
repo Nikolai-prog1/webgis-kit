@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.cache/
+test-results/
+playwright-report/
+app/static/data/*.geojson
+skills/webgis/references/config-reference.md
+docs/licenses/

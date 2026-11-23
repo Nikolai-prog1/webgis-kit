@@ -1,0 +1,67 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "minimal",
+    "title": "Minimal map",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "Minimal map"
+  },
+  "map": {
+    "center": [12, 45],
+    "zoom": 4
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "sample",
+      "title": "Reference points",
+      "geometry": "point",
+      "source": {
+        "type": "geojson",
+        "url": "data/sample.geojson"
+      },
+      "visible": true,
+      "table": true,
+      "popup": {
+        "title": "{name}"
+      }
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "data",
+      "title": "Map layers",
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        },
+        {
+          "type": "layer-list",
+          "layers": ["sample"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "sample",
+          "fields": ["name"],
+          "label": "Find a point"
+        }
+      ]
+    }
+  ],
+  "toolbar": ["home", "print", "clear"]
+}

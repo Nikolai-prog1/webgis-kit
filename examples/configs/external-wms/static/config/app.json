@@ -1,0 +1,63 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "external-example",
+    "title": "External WMS example",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "External WMS example"
+  },
+  "map": {
+    "center": [12, 45],
+    "zoom": 4
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      }
+    ]
+  },
+  "layers": [],
+  "sidebar": [
+    {
+      "id": "data",
+      "title": "Map layers",
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        },
+        {
+          "type": "catalog-launcher",
+          "catalog": "external"
+        }
+      ]
+    }
+  ],
+  "toolbar": ["home", "print", "clear"],
+  "services": {
+    "external": {
+      "type": "wms",
+      "url": "proxy/ext",
+      "title": "Public WMS",
+      "wmsVersion": "1.3.0"
+    }
+  },
+  "catalogs": [
+    {
+      "id": "external",
+      "title": "External WMS",
+      "type": "wms-capabilities",
+      "service": "external",
+      "lazy": true
+    }
+  ]
+}

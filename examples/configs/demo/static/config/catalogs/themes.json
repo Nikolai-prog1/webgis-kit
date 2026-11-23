@@ -1,0 +1,181 @@
+{
+  "$schema": "../../../../src/core/config/schema/catalog.schema.json",
+  "groups": [
+    {
+      "id": "reference",
+      "title": {
+        "en": "Reference",
+        "bg": "Обзорни слоеве"
+      },
+      "selectAll": true,
+      "layers": [
+        {
+          "id": "reference-borders",
+          "title": "Reference borders",
+          "geometry": "polygon",
+          "source": {
+            "type": "geojson",
+            "url": "data/countries.geojson"
+          },
+          "visible": false,
+          "table": true,
+          "style": {
+            "fill": "#EFFAFD",
+            "fillOpacity": 0.15,
+            "stroke": "#A0006D",
+            "strokeWidth": 1.6
+          },
+          "popup": {
+            "title": "{name}"
+          },
+          "attribution": "Made with Natural Earth. Public domain."
+        },
+        {
+          "id": "reference-rivers",
+          "title": "Reference rivers",
+          "geometry": "line",
+          "source": {
+            "type": "geojson",
+            "url": "data/rivers.geojson"
+          },
+          "visible": false,
+          "table": true,
+          "style": {
+            "fill": "#4A8BDF",
+            "fillOpacity": 0.15,
+            "stroke": "#4A8BDF",
+            "strokeWidth": 1.6
+          },
+          "popup": {
+            "title": "{name}"
+          },
+          "attribution": "Made with Natural Earth. Public domain."
+        }
+      ]
+    },
+    {
+      "id": "themes",
+      "title": {
+        "en": "Thematic views",
+        "bg": "Тематични изгледи"
+      },
+      "exclusive": true,
+      "opacity": 0.85,
+      "hint": {
+        "en": "Choose one thematic view.",
+        "bg": "Избери един тематичен изглед."
+      },
+      "layers": [
+        {
+          "id": "population-theme",
+          "title": "Population theme",
+          "geometry": "polygon",
+          "source": {
+            "type": "geojson",
+            "url": "data/countries.geojson"
+          },
+          "visible": false,
+          "table": true,
+          "style": {
+            "fill": "#4A8BDF",
+            "fillOpacity": 0.35,
+            "stroke": "#4A8BDF",
+            "strokeWidth": 1.6
+          },
+          "popup": {
+            "title": "{name}"
+          },
+          "attribution": "Made with Natural Earth. Public domain.",
+          "legend": [
+            {
+              "type": "polygon",
+              "fill": "#EFFAFD",
+              "stroke": "#4A8BDF",
+              "label": {
+                "en": "Up to 10 million",
+                "bg": "До 10 милиона"
+              }
+            },
+            {
+              "type": "polygon",
+              "fill": "#4A8BDF",
+              "stroke": "#4A8BDF",
+              "label": {
+                "en": "10–100 million",
+                "bg": "10–100 милиона"
+              }
+            },
+            {
+              "type": "polygon",
+              "fill": "#A0006D",
+              "stroke": "#4A8BDF",
+              "label": {
+                "en": "Over 100 million",
+                "bg": "Над 100 милиона"
+              }
+            }
+          ]
+        },
+        {
+          "id": "region-theme",
+          "title": "Regions theme",
+          "geometry": "polygon",
+          "source": {
+            "type": "geojson",
+            "url": "data/countries.geojson"
+          },
+          "visible": false,
+          "table": true,
+          "style": {
+            "fill": "#A0006D",
+            "fillOpacity": 0.35,
+            "stroke": "#A0006D",
+            "strokeWidth": 1.6
+          },
+          "popup": {
+            "title": "{name}"
+          },
+          "attribution": "Made with Natural Earth. Public domain.",
+          "legend": [
+            {
+              "type": "polygon",
+              "fill": "#4A8BDF",
+              "stroke": "#4A8BDF",
+              "label": "Africa"
+            },
+            {
+              "type": "polygon",
+              "fill": "#B9D4F3",
+              "stroke": "#4A8BDF",
+              "label": "Asia"
+            },
+            {
+              "type": "polygon",
+              "fill": "#A0006D",
+              "stroke": "#4A8BDF",
+              "label": "Europe"
+            },
+            {
+              "type": "polygon",
+              "fill": "#7E72C4",
+              "stroke": "#4A8BDF",
+              "label": "North America"
+            },
+            {
+              "type": "polygon",
+              "fill": "#D188B9",
+              "stroke": "#4A8BDF",
+              "label": "South America"
+            },
+            {
+              "type": "polygon",
+              "fill": "#D8ECFA",
+              "stroke": "#4A8BDF",
+              "label": "Oceania"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

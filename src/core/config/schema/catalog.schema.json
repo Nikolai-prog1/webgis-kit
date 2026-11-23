@@ -1,0 +1,480 @@
+{
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "defaults": {
+      "type": "object"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "title": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "exclusive": {
+            "type": "boolean"
+          },
+          "selectAll": {
+            "type": "boolean"
+          },
+          "hint": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "opacity": {
+            "type": "number"
+          },
+          "layers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "title": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "geometry": {
+                  "enum": ["point", "line", "polygon", "raster"]
+                },
+                "source": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "enum": ["wms", "geojson", "wfs", "xyz"]
+                    },
+                    "service": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "layers": {
+                      "type": "string"
+                    },
+                    "typeName": {
+                      "type": "string"
+                    },
+                    "dataProjection": {
+                      "type": "string"
+                    },
+                    "strategy": {
+                      "enum": ["bbox", "all"]
+                    },
+                    "attribution": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "minProperties": 1,
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    },
+                    "style": {
+                      "type": ["string", "null"]
+                    },
+                    "labelStyle": {
+                      "type": ["string", "null"]
+                    },
+                    "tiled": {
+                      "type": "boolean"
+                    },
+                    "params": {
+                      "type": "object"
+                    },
+                    "projection": {
+                      "type": ["string", "null"]
+                    },
+                    "hidpi": {
+                      "type": "boolean"
+                    },
+                    "emptyOnException": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "scaleCompensation": {
+                      "type": "boolean"
+                    },
+                    "maxFeatures": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "query": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "typeName": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["service", "typeName"],
+                  "additionalProperties": false
+                },
+                "visible": {
+                  "type": "boolean"
+                },
+                "queryable": {
+                  "type": "boolean"
+                },
+                "table": {
+                  "type": "boolean"
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "zIndex": {
+                  "type": ["number", "null"]
+                },
+                "minScale": {
+                  "type": ["number", "null"]
+                },
+                "maxScale": {
+                  "type": ["number", "null"]
+                },
+                "extent": {
+                  "type": ["array", "null"],
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                "style": {
+                  "type": "object",
+                  "properties": {
+                    "fill": {
+                      "type": "string"
+                    },
+                    "fillOpacity": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "stroke": {
+                      "type": "string"
+                    },
+                    "strokeWidth": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "dasharray": {
+                      "type": ["array", "null"],
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    },
+                    "radius": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "shape": {
+                      "enum": ["circle", "square", "triangle", "diamond"]
+                    },
+                    "label": {
+                      "type": "object",
+                      "properties": {
+                        "field": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "color": {
+                          "type": "string"
+                        },
+                        "halo": {
+                          "type": "string"
+                        },
+                        "minZoom": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "required": ["field"],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "legend": {
+                  "oneOf": [
+                    {
+                      "const": "auto"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "enum": [
+                              "point",
+                              "line",
+                              "polygon",
+                              "raster",
+                              "image"
+                            ]
+                          },
+                          "label": {
+                            "oneOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "object",
+                                "minProperties": 1,
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              }
+                            ]
+                          },
+                          "shape": {
+                            "enum": ["circle", "square", "triangle", "diamond"]
+                          },
+                          "fill": {
+                            "type": ["string", "null"]
+                          },
+                          "stroke": {
+                            "type": ["string", "null"]
+                          },
+                          "fillOpacity": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "strokeWidth": {
+                            "type": "number",
+                            "minimum": 0
+                          },
+                          "dasharray": {
+                            "type": ["array", "string", "null"],
+                            "items": {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "hatch": {
+                            "type": "object",
+                            "properties": {
+                              "color": {
+                                "type": "string"
+                              },
+                              "angle": {
+                                "type": "number"
+                              },
+                              "spacing": {
+                                "type": "number",
+                                "minimum": 1
+                              },
+                              "width": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                              }
+                            },
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": ["type"],
+                        "additionalProperties": false,
+                        "allOf": [
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "image"
+                                }
+                              }
+                            },
+                            "then": {
+                              "required": ["url"]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "fields": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                      "label": {
+                        "oneOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "object",
+                            "minProperties": 1,
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        ]
+                      },
+                      "format": {
+                        "enum": ["text", "number", "id", "date", "link"]
+                      },
+                      "hidden": {
+                        "type": "boolean"
+                      },
+                      "order": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": false
+                  }
+                },
+                "popup": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "minProperties": 1,
+                          "additionalProperties": {
+                            "type": "string"
+                          }
+                        }
+                      ]
+                    },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "formatter": {
+                      "type": ["string", "null"]
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "note": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "provider": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                },
+                "attribution": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    }
+                  ]
+                }
+              },
+              "required": ["id", "title", "source"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["id", "title", "layers"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["groups"],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Layer catalog"
+}

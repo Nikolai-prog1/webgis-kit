@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgis/postgis:17-3.7
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PG_SUPERUSER_PASSWORD:?Run npm run stack -- up --mode docker}
+      WEBGIS_DB_PASSWORD: ${WEBGIS_DB_PASSWORD:?Run npm run stack -- up --mode docker}
+    ports:
+      - '127.0.0.1:${WEBGIS_DB_PORT:-5433}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./initdb/20-webgis.sh:/docker-entrypoint-initdb.d/20-webgis.sh:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 3s
+      timeout: 5s
+      retries: 60
+  geoserver:
+    image: docker.osgeo.org/geoserver:3.0.2
+    environment:
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_PASSWORD:?Run npm run stack -- up --mode docker}
+    ports:
+      - '127.0.0.1:${WEBGIS_GS_PORT:-8080}:8080'
+    volumes:
+      - geoserver-data:/opt/geoserver_data
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres-data:
+  geoserver-data:

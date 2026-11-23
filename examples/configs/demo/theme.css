@@ -1,0 +1,38 @@
+:root {
+  --wg-accent: #a0006d;
+  --wg-accent-strong: #790053;
+  --wg-accent-soft: #effafd;
+  --wg-on-accent: #fff;
+  --wg-bg: #effafd;
+  --wg-panel: #fff;
+  --wg-panel-muted: #effafd;
+  --wg-border: #cedded;
+  --wg-border-strong: #4a8bdf;
+  --wg-text: #282235;
+  --wg-muted: #63586e;
+  --wg-info: #4a8bdf;
+  --wg-shadow-soft: 0 10px 38px #4a8bdf20;
+  --wg-shadow-tight: 0 2px 8px #a0006d14;
+}
+
+.wg-map {
+  background: var(--wg-bg);
+}
+
+.wg-brand strong {
+  color: var(--wg-accent);
+}
+
+.wg-section__toggle .ti:first-child {
+  color: var(--wg-border-strong);
+}
+
+.wg-measure-label:not(.wg-measure-label--finished) {
+  background: var(--wg-accent);
+}
+
+.wg-field input,
+.wg-field select,
+.wg-catalog-search {
+  border-color: var(--wg-border-strong);
+}

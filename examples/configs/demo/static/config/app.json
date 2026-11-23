@@ -1,0 +1,443 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "demo",
+    "title": "WebGIS Kit Demo",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "WebGIS Kit",
+    "subtitle": {
+      "en": "Explore the world",
+      "bg": "Опознай света"
+    },
+    "logo": "brand/logo.svg",
+    "favicon": "brand/favicon.svg"
+  },
+  "map": {
+    "center": [12, 38],
+    "zoom": 3,
+    "minZoom": 2,
+    "maxZoom": 20
+  },
+  "crs": [
+    {
+      "code": "EPSG:4326",
+      "label": "WGS84",
+      "kind": "geographic",
+      "decimals": 5
+    },
+    {
+      "code": "EPSG:3857",
+      "label": "Web Mercator",
+      "kind": "projected",
+      "decimals": 0,
+      "bbox": [-20037508, -20037508, 20037508, 20037508]
+    }
+  ],
+  "services": {
+    "external": {
+      "type": "wms",
+      "url": "https://ows.terrestris.de/osm/service",
+      "title": "terrestris OpenStreetMap WMS",
+      "wmsVersion": "1.3.0"
+    }
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "opacityControl": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      },
+      {
+        "id": "satellite",
+        "type": "xyz",
+        "title": {
+          "en": "Sentinel-2 cloudless 2016",
+          "bg": "Sentinel-2 без облаци 2016"
+        },
+        "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg",
+        "maxZoom": 14,
+        "attribution": "EOxCloudless https://cloudless.eox.at by EOX IT Services GmbH (Contains modified Copernicus Sentinel data 2016). CC BY 4.0."
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "countries",
+      "title": {
+        "en": "Countries",
+        "bg": "Държави"
+      },
+      "geometry": "polygon",
+      "source": {
+        "type": "geojson",
+        "url": "data/countries.geojson"
+      },
+      "visible": true,
+      "table": true,
+      "style": {
+        "fill": "#4A8BDF",
+        "stroke": "#4A8BDF",
+        "strokeWidth": 1.1,
+        "fillOpacity": 0.12,
+        "radius": 4.5
+      },
+      "popup": {
+        "title": "{name}"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain."
+    },
+    {
+      "id": "rivers",
+      "title": {
+        "en": "Rivers",
+        "bg": "Реки"
+      },
+      "geometry": "line",
+      "source": {
+        "type": "geojson",
+        "url": "data/rivers.geojson"
+      },
+      "visible": true,
+      "table": true,
+      "style": {
+        "fill": "#4A8BDF",
+        "stroke": "#4A8BDF",
+        "strokeWidth": 1.6,
+        "fillOpacity": 0.9,
+        "radius": 4.5
+      },
+      "popup": {
+        "title": "{name}"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain."
+    },
+    {
+      "id": "cities",
+      "title": {
+        "en": "Cities",
+        "bg": "Градове"
+      },
+      "geometry": "point",
+      "source": {
+        "type": "geojson",
+        "url": "data/cities.geojson"
+      },
+      "visible": true,
+      "table": true,
+      "style": {
+        "fill": "#A0006D",
+        "stroke": "#EFFAFD",
+        "strokeWidth": 1.3,
+        "fillOpacity": 0.9,
+        "radius": 5
+      },
+      "popup": {
+        "title": "{name}",
+        "formatter": "cityCard"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain."
+    }
+  ],
+  "catalogs": [
+    {
+      "id": "themes",
+      "title": {
+        "en": "Thematic layers",
+        "bg": "Тематични слоеве"
+      },
+      "src": "config/catalogs/themes.json"
+    },
+    {
+      "id": "external",
+      "title": {
+        "en": "External WMS",
+        "bg": "Външен WMS"
+      },
+      "type": "wms-capabilities",
+      "service": "external",
+      "include": ["OSM-WMS"],
+      "exclude": [],
+      "lazy": true,
+      "titles": {
+        "OSM-WMS": "OpenStreetMap WMS"
+      }
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "basemaps",
+      "title": {
+        "en": "Base maps",
+        "bg": "Базови карти"
+      },
+      "icon": "ti-world",
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        }
+      ]
+    },
+    {
+      "id": "places",
+      "title": {
+        "en": "Places",
+        "bg": "Места"
+      },
+      "icon": "ti-map-pin",
+      "open": true,
+      "blocks": [
+        {
+          "type": "layer-list",
+          "layers": ["cities", "rivers", "countries"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "cities",
+          "fields": ["name", "country"],
+          "label": {
+            "en": "Find a city",
+            "bg": "Намери град"
+          },
+          "placeholder": {
+            "en": "e.g. London",
+            "bg": "напр. London"
+          },
+          "limit": 25,
+          "minChars": 1,
+          "result": {
+            "title": "{name}",
+            "subtitle": "{country}"
+          },
+          "highlight": {
+            "labelField": "name"
+          },
+          "zoomTo": true,
+          "maxZoom": 12,
+          "showLayerOnSearch": true
+        }
+      ]
+    },
+    {
+      "id": "filter",
+      "title": {
+        "en": "Filter countries",
+        "bg": "Филтър на държави"
+      },
+      "icon": "ti-adjustments-horizontal",
+      "open": false,
+      "blocks": [
+        {
+          "type": "attribute-filter",
+          "layer": "countries",
+          "limit": 500,
+          "controls": [
+            {
+              "type": "range",
+              "field": "population",
+              "label": {
+                "en": "Population",
+                "bg": "Население"
+              }
+            },
+            {
+              "type": "select",
+              "field": "continent",
+              "label": {
+                "en": "Continent",
+                "bg": "Континент"
+              },
+              "values": "auto"
+            },
+            {
+              "type": "select",
+              "field": "tags",
+              "label": {
+                "en": "Tags",
+                "bg": "Етикети"
+              },
+              "values": "auto",
+              "multiValue": {
+                "separator": ";",
+                "filterField": "tags_filter",
+                "wrap": "|"
+              }
+            },
+            {
+              "type": "text",
+              "field": "name",
+              "label": {
+                "en": "Country name",
+                "bg": "Име на държава"
+              }
+            }
+          ],
+          "result": {
+            "title": "{name}",
+            "subtitle": "{continent}"
+          },
+          "maxZoom": 6
+        }
+      ]
+    },
+    {
+      "id": "thematic",
+      "title": {
+        "en": "Thematic layers",
+        "bg": "Тематични слоеве"
+      },
+      "icon": "ti-stack-2",
+      "open": true,
+      "blocks": [
+        {
+          "type": "catalog-launcher",
+          "catalog": "themes",
+          "label": {
+            "en": "Open thematic catalog",
+            "bg": "Отвори тематичния каталог"
+          }
+        }
+      ]
+    },
+    {
+      "id": "external",
+      "title": {
+        "en": "External WMS",
+        "bg": "Външен WMS"
+      },
+      "icon": "ti-world",
+      "open": false,
+      "blocks": [
+        {
+          "type": "catalog-launcher",
+          "catalog": "external",
+          "label": {
+            "en": "Browse external WMS",
+            "bg": "Разгледай външния WMS"
+          }
+        }
+      ]
+    }
+  ],
+  "toolbar": [
+    "measure-distance",
+    "measure-area",
+    "marker",
+    "goto-coordinates",
+    "home",
+    "print",
+    "clear"
+  ],
+  "statusBar": {
+    "coordinates": ["EPSG:4326", "EPSG:3857"],
+    "scaleLine": true
+  },
+  "print": {
+    "defaultTitle": "WebGIS Kit · World overview",
+    "showLogo": true,
+    "northArrow": true,
+    "legend": true,
+    "filenamePrefix": "webgis-map"
+  }
+}

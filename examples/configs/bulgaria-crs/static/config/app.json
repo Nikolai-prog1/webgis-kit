@@ -1,0 +1,90 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "local-crs-example",
+    "title": "Local CRS example",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "Local CRS example"
+  },
+  "map": {
+    "center": [25.5, 42.6678756833333],
+    "zoom": 7
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      }
+    ]
+  },
+  "layers": [
+    {
+      "id": "sample",
+      "title": "Reference points",
+      "geometry": "point",
+      "source": {
+        "type": "geojson",
+        "url": "data/sample.geojson"
+      },
+      "visible": true,
+      "table": true,
+      "popup": {
+        "title": "{name}"
+      }
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "data",
+      "title": "Map layers",
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        },
+        {
+          "type": "layer-list",
+          "layers": ["sample"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "sample",
+          "fields": ["name"],
+          "label": "Find a point"
+        }
+      ]
+    }
+  ],
+  "toolbar": ["goto-coordinates", "marker", "home", "print", "clear"],
+  "crs": [
+    {
+      "code": "EPSG:4326",
+      "label": "WGS84",
+      "kind": "geographic",
+      "decimals": 5
+    },
+    {
+      "code": "EPSG:7801",
+      "label": "BGS2005",
+      "kind": "projected",
+      "proj4": "+proj=lcc +lat_1=42 +lat_2=43.3333333333333 +lat_0=42.6678756833333 +lon_0=25.5 +x_0=500000 +y_0=4725824.3591 +ellps=GRS80 +units=m +no_defs",
+      "bbox": [236773.58, 4567229.48, 990127.3, 4915558.57],
+      "worldBbox": [22.36, 41.24, 28.68, 44.23],
+      "axisOrder": "ne",
+      "axisLabels": ["X", "Y"],
+      "decimals": 2
+    }
+  ],
+  "statusBar": {
+    "coordinates": ["EPSG:4326", "EPSG:7801"],
+    "scaleLine": true
+  }
+}

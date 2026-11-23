@@ -1,0 +1,14 @@
+{
+  "name": "webgis",
+  "version": "0.2.2",
+  "description": "Create a 2D web GIS from GeoJSON, GeoPackage, Shapefile or existing PostGIS/GeoServer, including local stacks, import and browser verification.",
+  "author": {
+    "name": "Nikolai-prog1"
+  },
+  "homepage": "https://github.com/Nikolai-prog1/webgis-kit",
+  "repository": "https://github.com/Nikolai-prog1/webgis-kit",
+  "license": "MIT",
+  "skills": [
+    "./skills/"
+  ]
+}

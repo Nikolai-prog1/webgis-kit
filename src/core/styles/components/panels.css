@@ -1,0 +1,123 @@
+.wg-panel {
+  pointer-events: auto;
+  position: absolute;
+  width: min(370px, calc(100% - 20px));
+  max-height: calc(100% - 40px);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  background: var(--wg-panel);
+  border: 1px solid var(--wg-border);
+  border-radius: var(--wg-radius);
+  box-shadow: var(--wg-shadow-soft);
+  resize: both;
+  overflow: hidden;
+}
+.wg-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 43px;
+  padding: 5px 10px 5px 15px;
+  border-bottom: 1px solid var(--wg-border);
+  cursor: move;
+  touch-action: none;
+  background: var(--wg-panel-muted);
+}
+.wg-panel__header strong {
+  font-weight: 600;
+  font-size: 12px;
+}
+.wg-panel__buttons {
+  display: flex;
+  gap: 3px;
+}
+.wg-panel__buttons button {
+  min-height: 28px;
+  padding: 0 7px;
+  font-size: 18px;
+  border: 0;
+  background: transparent;
+}
+.wg-panel__content {
+  padding: 12px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.wg-panel--bottom {
+  left: 10px !important;
+  right: 10px;
+  bottom: 36px;
+  width: auto;
+  height: 300px;
+  resize: vertical;
+}
+.wg-results {
+  display: grid;
+  gap: 7px;
+}
+.wg-result {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.wg-result small {
+  color: var(--wg-muted);
+}
+.wg-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 10px;
+}
+.wg-table__scroll {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.wg-table table {
+  border-collapse: collapse;
+  min-width: 100%;
+  white-space: nowrap;
+}
+.wg-table th {
+  background: var(--wg-panel-muted);
+  position: sticky;
+  top: 0;
+  text-align: left;
+}
+.wg-table th button {
+  background: transparent;
+  border: 0;
+  font-weight: 600;
+}
+.wg-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--wg-border);
+}
+.wg-table tbody tr {
+  cursor: pointer;
+}
+.wg-table tbody tr:hover {
+  background: var(--wg-accent-soft);
+}
+@media (max-width: 720px) {
+  .wg-panel,
+  .wg-panel--bottom {
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100%;
+    min-height: 0;
+    border-radius: 0;
+    resize: none;
+  }
+  .wg-table .wg-row {
+    flex-wrap: wrap;
+  }
+}

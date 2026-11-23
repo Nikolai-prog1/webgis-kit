@@ -1,0 +1,378 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "geoserver-full-example",
+    "title": "GeoServer full example",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "GeoServer full example"
+  },
+  "map": {
+    "center": [12, 38],
+    "zoom": 3,
+    "minZoom": 2,
+    "maxZoom": 20
+  },
+  "crs": [
+    {
+      "code": "EPSG:4326",
+      "label": "WGS84",
+      "kind": "geographic",
+      "decimals": 5
+    },
+    {
+      "code": "EPSG:3857",
+      "label": "Web Mercator",
+      "kind": "projected",
+      "decimals": 0,
+      "bbox": [-20037508, -20037508, 20037508, 20037508]
+    }
+  ],
+  "services": {
+    "main": {
+      "type": "geoserver",
+      "url": "geoserver",
+      "workspace": "demo",
+      "title": "Local GeoServer",
+      "wmsVersion": "1.1.1",
+      "wfsVersion": "2.0.0"
+    }
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "opacityControl": true,
+    "items": []
+  },
+  "layers": [
+    {
+      "id": "countries",
+      "title": {
+        "en": "Countries",
+        "bg": "Държави"
+      },
+      "geometry": "polygon",
+      "source": {
+        "type": "wms",
+        "service": "main",
+        "layers": "countries",
+        "style": "countries",
+        "tiled": true
+      },
+      "visible": true,
+      "table": true,
+      "popup": {
+        "title": "{name}"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        },
+        "id": {
+          "hidden": true
+        },
+        "seed_id": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain.",
+      "legend": "auto"
+    },
+    {
+      "id": "rivers",
+      "title": {
+        "en": "Rivers",
+        "bg": "Реки"
+      },
+      "geometry": "line",
+      "source": {
+        "type": "wms",
+        "service": "main",
+        "layers": "rivers",
+        "style": "rivers",
+        "tiled": true
+      },
+      "visible": true,
+      "table": true,
+      "popup": {
+        "title": "{name}"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        },
+        "id": {
+          "hidden": true
+        },
+        "seed_id": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain.",
+      "legend": "auto"
+    },
+    {
+      "id": "cities",
+      "title": {
+        "en": "Cities",
+        "bg": "Градове"
+      },
+      "geometry": "point",
+      "source": {
+        "type": "wms",
+        "service": "main",
+        "layers": "cities",
+        "style": "cities",
+        "tiled": true
+      },
+      "visible": true,
+      "table": true,
+      "popup": {
+        "title": "{name}"
+      },
+      "fields": {
+        "name": {
+          "label": {
+            "en": "Name",
+            "bg": "Име"
+          },
+          "order": 0
+        },
+        "country": {
+          "label": {
+            "en": "Country",
+            "bg": "Държава"
+          }
+        },
+        "population": {
+          "label": {
+            "en": "Population",
+            "bg": "Население"
+          },
+          "format": "number"
+        },
+        "continent": {
+          "label": {
+            "en": "Continent",
+            "bg": "Континент"
+          }
+        },
+        "tags_filter": {
+          "hidden": true
+        },
+        "id": {
+          "hidden": true
+        },
+        "seed_id": {
+          "hidden": true
+        }
+      },
+      "attribution": "Made with Natural Earth. Public domain.",
+      "legend": "auto"
+    }
+  ],
+  "catalogs": [
+    {
+      "id": "workspace",
+      "title": "Workspace catalog",
+      "type": "wms-capabilities",
+      "service": "main",
+      "include": [
+        "cities",
+        "rivers",
+        "countries",
+        "demo:cities",
+        "demo:rivers",
+        "demo:countries"
+      ],
+      "lazy": true
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "layers",
+      "title": "GeoServer layers",
+      "open": true,
+      "blocks": [
+        {
+          "type": "layer-list",
+          "layers": ["cities", "rivers", "countries"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "cities",
+          "fields": ["name", "country"],
+          "label": "Find a city (WFS)",
+          "placeholder": {
+            "en": "e.g. London",
+            "bg": "напр. London"
+          },
+          "limit": 25,
+          "minChars": 1,
+          "result": {
+            "title": "{name}",
+            "subtitle": "{country}"
+          },
+          "highlight": {
+            "labelField": "name"
+          },
+          "zoomTo": true,
+          "maxZoom": 12,
+          "showLayerOnSearch": true
+        }
+      ]
+    },
+    {
+      "id": "filter",
+      "title": "Filter countries (WFS)",
+      "open": true,
+      "blocks": [
+        {
+          "type": "attribute-filter",
+          "layer": "countries",
+          "limit": 500,
+          "controls": [
+            {
+              "type": "range",
+              "field": "population",
+              "label": {
+                "en": "Population",
+                "bg": "Население"
+              }
+            },
+            {
+              "type": "select",
+              "field": "continent",
+              "label": {
+                "en": "Continent",
+                "bg": "Континент"
+              },
+              "values": "auto"
+            },
+            {
+              "type": "select",
+              "field": "tags",
+              "label": {
+                "en": "Tags",
+                "bg": "Етикети"
+              },
+              "values": "auto",
+              "multiValue": {
+                "separator": ";",
+                "filterField": "tags_filter",
+                "wrap": "|"
+              }
+            },
+            {
+              "type": "text",
+              "field": "name",
+              "label": {
+                "en": "Country name",
+                "bg": "Име на държава"
+              }
+            }
+          ],
+          "result": {
+            "title": "{name}",
+            "subtitle": "{continent}"
+          },
+          "maxZoom": 6
+        }
+      ]
+    },
+    {
+      "id": "catalog",
+      "title": "Catalog",
+      "open": true,
+      "blocks": [
+        {
+          "type": "catalog-launcher",
+          "catalog": "workspace",
+          "label": "Browse workspace"
+        }
+      ]
+    }
+  ],
+  "toolbar": [
+    "measure-distance",
+    "measure-area",
+    "marker",
+    "goto-coordinates",
+    "home",
+    "print",
+    "clear"
+  ],
+  "statusBar": {
+    "coordinates": ["EPSG:4326", "EPSG:3857"],
+    "scaleLine": true
+  },
+  "print": {
+    "defaultTitle": "GeoServer demo",
+    "showLogo": false,
+    "northArrow": true,
+    "legend": true,
+    "filenamePrefix": "webgis-map"
+  },
+  "links": [],
+  "identify": {
+    "enabled": true,
+    "featureCount": 5,
+    "buffer": 12,
+    "hoverCursor": false
+  }
+}

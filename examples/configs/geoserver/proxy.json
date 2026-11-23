@@ -1,0 +1,8 @@
+[
+  {
+    "path": "/geoserver",
+    "env": "GEOSERVER_URL",
+    "default": "http://localhost:8080",
+    "stripPrefix": false
+  }
+]

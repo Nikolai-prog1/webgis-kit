@@ -1,0 +1,11 @@
+{
+  "name": "webgis-kit",
+  "owner": { "name": "Nikolai-prog1" },
+  "plugins": [
+    {
+      "name": "webgis",
+      "source": "./",
+      "description": "Create 2D web GIS projects from local data or existing PostGIS/GeoServer, including bootstrap, stacks and import."
+    }
+  ]
+}
