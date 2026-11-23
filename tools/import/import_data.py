@@ -262,21 +262,41 @@ def configure(config, items, target, service, workspace, section=None, search='a
             else: block['blocks'].append(value)
         text_fields = [key for key,f in item['fields'].items() if f['type'] == 'text' and key != item['primary']]
         preferred = [key for key in text_fields if re.search('name|ime|code|kod|title',key)]
-        selected = (preferred or text_fields)[:2] if search == 'auto' else search.split(',') if search != 'none' else []
+        # A search or filter over one feature is clutter; an explicit --search still applies.
+        few = item['count'] < 2
+        selected = ([] if few else (preferred or text_fields)[:2]) if search == 'auto' else search.split(',') if search != 'none' else []
         if any(key not in item['fields'] for key in selected): raise ValueError('Search field is missing from the imported data.')
         title_field = (preferred or text_fields or [item['primary']])[0]
         layer['popup'] = {'title':'{' + title_field + '}'}
-        if selected: add_block({'type':'attribute-search','layer':layer_id,'fields':selected,'label':item['title'],'result':{'title':'{'+title_field+'}'},'maxZoom':14})
+        if selected: add_block({'type':'attribute-search','layer':layer_id,'fields':selected,'label':item['title'],
+                                'placeholder':', '.join(item['fields'][key]['label'] for key in selected),'result':{'title':'{'+title_field+'}'},'maxZoom':14})
         controls = []
-        if filters == 'auto':
+        if filters == 'auto' and not few:
             for key,field in item['fields'].items():
                 if key == item['primary'] or field['type'] == 'jsonb': continue
                 if field['type'] in ('bigint','double precision'): kind = 'range'
                 elif field['type'] in ('text','boolean') and field['distinct'] <= 50: kind = 'select'
                 else: continue
-                controls.append({'type':kind,'field':key,'label':field['label'],**({'values':'auto'} if kind == 'select' else {})})
+                # No label: the filter shows the layer field label, so renaming a field relabels its control.
+                controls.append({'type':kind,'field':key,**({'values':'auto'} if kind == 'select' else {})})
         if controls: add_block({'type':'attribute-filter','layer':layer_id,'controls':controls,'result':{'title':'{'+title_field+'}'}})
+    fit_view(config, items)
     return config
+
+def fit_view(config, items):
+    """Open a map that has no chosen home view on the imported data."""
+    view = config.setdefault('map', {})
+    extents = [item['extent'] for item in items if item.get('extent') and item['extent'] != [-180,-85,180,85]]
+    if view.get('homeExtent') or not extents: return
+    west, south = min(e[0] for e in extents), min(e[1] for e in extents)
+    east, north = max(e[2] for e in extents), max(e[3] for e in extents)
+    pad_x, pad_y = max((east - west) * .05, .002), max((north - south) * .05, .002)
+    west, south, east, north = max(west - pad_x, -180), max(south - pad_y, -85), min(east + pad_x, 180), min(north + pad_y, 85)
+    to_y = lambda lat: math.log(math.tan(math.pi / 4 + math.radians(lat) / 2))
+    span = max((east - west) / 360, (to_y(north) - to_y(south)) / (2 * math.pi) * 1.6)
+    view['center'] = [round((west + east) / 2, 6), round((south + north) / 2, 6)]
+    view['zoom'] = max(2, min(16, math.floor(math.log2(900 / (256 * span)))))
+    view['homeExtent'] = [round(v, 6) for v in (west, south, east, north)]
 
 def atomic_write(file, data):
     file.parent.mkdir(parents=True, exist_ok=True)

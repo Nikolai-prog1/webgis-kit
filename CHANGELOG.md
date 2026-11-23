@@ -2,6 +2,24 @@
 
 This file follows Keep a Changelog. The initial release is 0.1.0.
 
+## [0.2.3] - 2026-11-23
+
+Findings from an independent first-use test (fresh machine, skill installed from GitHub).
+
+### Fixed
+
+- The first import centres the map on the data and sets `map.homeExtent`, instead of leaving the starter's country-wide view. A view already chosen is kept.
+- The generic search placeholder no longer shows demo text ("Name or country"); imported search boxes name their fields.
+- Filter controls without a label use the layer's field label, so renaming a field relabels its filter; the importer no longer copies raw field names into filters.
+- No automatic search or filter for single-feature layers.
+- New projects can no longer push to the template by accident: the `upstream` remote is fetch-only.
+- `npm run smoke` falls back to an installed Chromium, Chrome or Edge (or `WEBGIS_CHROMIUM`) when Playwright's pinned build is missing, and says when a requested screenshot was not written.
+
+### Changed
+
+- The starter opens in English; `create-project.mjs --locale en|bg` selects the starting language.
+- Skill guidance: obtaining Node 24 when the system Node is older, when GDAL is needed, and relabelling imported fields.
+
 ## [0.2.2] - 2026-11-23
 
 ### Changed

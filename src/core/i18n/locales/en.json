@@ -29,7 +29,7 @@
   "catalog.none": "None",
   "catalog.empty": "No selected layers",
   "search.button": "Search",
-  "search.placeholder": "Name or country",
+  "search.placeholder": "Search",
   "search.noResults": "No results found.",
   "search.results": "Results: {count}",
   "search.missingGeometry": "{count} results have no coordinates.",

@@ -195,9 +195,11 @@ export async function smoke(args = process.argv.slice(2)) {
         } catch (error) {
           if (!/executable|install|browser.*not found/i.test(error.message))
             throw error;
-          console.log(
-            'Chromium unavailable: HTTP checks only; run npx playwright install chromium for browser verification.',
-          );
+          browser = await launchInstalled(chromium);
+          if (!browser)
+            console.log(
+              'Chromium unavailable: HTTP checks only; run npx playwright install chromium, or set WEBGIS_CHROMIUM to a Chromium/Chrome executable, for browser verification.',
+            );
         }
       }
       if (browser) {
@@ -228,6 +230,10 @@ export async function smoke(args = process.argv.slice(2)) {
         console.log('Browser: map rendered; no console/page errors.');
       }
     }
+    if (screenshot && !browser)
+      console.log(
+        `No screenshot written to ${screenshot}: no browser was available.`,
+      );
     console.log(
       `Smoke passed: ${checked.length} layer/service checks${browser ? ' and Chromium' : ' (HTTP only; visual inspection is not verified)'}.`,
     );
@@ -253,3 +259,40 @@ if (
     console.error('Smoke failed: ' + error.message);
     process.exitCode = 1;
   });
+
+// The pinned Playwright build can be absent while another Chromium is installed
+// (a shared browser cache, system Chrome or Edge). Try those before HTTP-only.
+async function launchInstalled(chromium) {
+  const candidates = [];
+  if (process.env.WEBGIS_CHROMIUM)
+    candidates.push({ executablePath: process.env.WEBGIS_CHROMIUM });
+  const cache = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (cache && fs.existsSync(cache))
+    for (const dir of fs
+      .readdirSync(cache)
+      .filter((name) => /^chromium/.test(name))
+      .sort()
+      .reverse())
+      for (const sub of [
+        'chrome-linux64/chrome',
+        'chrome-linux/chrome',
+        'chrome-win64/chrome.exe',
+        'chrome-win/chrome.exe',
+        'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      ])
+        if (fs.existsSync(path.join(cache, dir, sub)))
+          candidates.push({ executablePath: path.join(cache, dir, sub) });
+  candidates.push({ channel: 'chrome' }, { channel: 'msedge' });
+  for (const option of candidates) {
+    try {
+      const browser = await chromium.launch({ headless: true, ...option });
+      console.log(
+        `Browser: using installed ${option.executablePath || option.channel}.`,
+      );
+      return browser;
+    } catch {
+      // try the next installed browser
+    }
+  }
+  return null;
+}

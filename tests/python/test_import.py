@@ -79,10 +79,31 @@ class ImportTests(unittest.TestCase):
         blocks = updated['sidebar'][-1]['blocks']
         self.assertEqual(next(b for b in blocks if b['type'] == 'attribute-search')['fields'],['ime'])
         controls = next(b for b in blocks if b['type'] == 'attribute-filter')['controls']
-        self.assertIn({'type':'range','field':'value','label':'value'},controls)
-        self.assertIn({'type':'select','field':'category','label':'category','values':'auto'},controls)
+        self.assertIn({'type':'range','field':'value'},controls)
+        self.assertIn({'type':'select','field':'category','values':'auto'},controls)
+        self.assertEqual(next(b for b in blocks if b['type'] == 'attribute-search')['placeholder'],'Име')
         self.assertTrue(updated['layers'][0]['fields']['id']['hidden'])
         self.assertEqual(module.configure(updated,[item],'geojson','main','fixture')['sidebar'][-1]['blocks'],blocks)
+
+    def test_first_import_opens_on_the_data_and_keeps_a_chosen_view(self):
+        config = json.loads((self.instance / 'static/config/app.json').read_text(encoding='utf-8'))
+        item = module.dataset(self.file)
+        view = module.configure(config,[item],'geojson','main','fixture')['map']
+        west, south, east, north = view['homeExtent']
+        self.assertTrue(west < 25 and south < 43 and east > 26 and north > 44)
+        self.assertEqual(view['center'],[25.5,43.5])
+        self.assertTrue(5 <= view['zoom'] <= 9)
+        config['map']['homeExtent'] = [20,40,30,45]
+        self.assertEqual(module.configure(config,[item],'geojson','main','fixture')['map']['homeExtent'],[20,40,30,45])
+
+    def test_single_feature_layers_get_no_automatic_search_or_filter(self):
+        self.data['features'] = self.data['features'][:1]
+        self.file.write_text(json.dumps(self.data, ensure_ascii=False), encoding='utf-8')
+        config = json.loads((self.instance / 'static/config/app.json').read_text(encoding='utf-8'))
+        updated = module.configure(config,[module.dataset(self.file)],'geojson','main','fixture')
+        kinds = [b['type'] for b in updated['sidebar'][-1]['blocks']]
+        self.assertEqual(kinds,['layer-list'])
+        self.assertTrue(updated['map']['zoom'] >= 12)
 
     def test_atomic_configuration_write_rolls_back_validation_failure(self):
         file = self.instance / 'static/config/app.json'

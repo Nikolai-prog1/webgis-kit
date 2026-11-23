@@ -3,8 +3,8 @@
   "app": {
     "id": "webgis",
     "title": "My web map",
-    "locale": "bg",
-    "locales": ["bg", "en"]
+    "locale": "en",
+    "locales": ["en", "bg"]
   },
   "branding": {
     "title": "My web map"

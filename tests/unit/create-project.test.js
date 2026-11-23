@@ -45,6 +45,7 @@ test('bootstrap from a local bare source preserves existing folders and offers s
     ref: 'main',
     noInstall: true,
     name: 'Neutral map',
+    locale: 'bg',
   });
   expect(
     execFileSync('git', ['remote', 'get-url', 'upstream'], {
@@ -52,6 +53,18 @@ test('bootstrap from a local bare source preserves existing folders and offers s
       encoding: 'utf8',
     }).trim(),
   ).toBe(bare);
+  // Fetching updates stays possible; pushing to the template is not.
+  expect(
+    execFileSync('git', ['remote', 'get-url', '--push', 'upstream'], {
+      cwd: target,
+      encoding: 'utf8',
+    }).trim(),
+  ).toBe('no-push');
+  const created = JSON.parse(
+    fs.readFileSync(path.join(target, 'app/static/config/app.json')),
+  ).app;
+  expect(created.locale).toBe('bg');
+  expect(created.locales[0]).toBe('bg');
   expect(
     execFileSync('git', ['branch', '--show-current'], {
       cwd: target,
@@ -90,7 +103,7 @@ test('bootstrap refuses inline credentials before invoking git', () => {
   );
   expect(() =>
     createProject(target, {
-        source: 'https://user:fixture-secret@localhost/kit.git',
+      source: 'https://user:fixture-secret@localhost/kit.git',
       noInstall: true,
     }),
   ).toThrow('credential helper');

@@ -7,6 +7,12 @@ export default {
   setup(ctx, options, mount) {
     const form = el('form');
     const controls = [];
+    // An unlabelled control uses the layer's field label, then the field name.
+    const labelOf = (control) =>
+      ctx.localized(
+        control.label ||
+          ctx.layers.get(options.layer)?.def?.fields?.[control.field]?.label,
+      ) || control.field;
     const results = createResults(ctx, options, 'filter');
     let controller;
     if (options.note)
@@ -14,11 +20,7 @@ export default {
         el('p', { class: 'wg-muted', text: ctx.localized(options.note) }),
       );
     for (const control of options.controls) {
-      const label = el(
-        'label',
-        { class: 'wg-field' },
-        ctx.localized(control.label) || control.field,
-      );
+      const label = el('label', { class: 'wg-field' }, labelOf(control));
       const record = { control, inputs: [] };
       if (control.type === 'range') {
         const row = el('div', { class: 'wg-row' });
@@ -27,7 +29,7 @@ export default {
             type: 'text',
             inputMode: 'decimal',
             placeholder: ctx.t(`filter.${bound}`),
-            'aria-label': `${ctx.localized(control.label) || control.field}: ${ctx.t(`filter.${bound}`)}`,
+            'aria-label': `${labelOf(control)}: ${ctx.t(`filter.${bound}`)}`,
           });
           row.append(input);
           record.inputs.push(input);
@@ -36,7 +38,7 @@ export default {
       } else if (control.type === 'select') {
         const select = el(
           'select',
-          { 'aria-label': ctx.localized(control.label) || control.field },
+          { 'aria-label': labelOf(control) },
           el('option', { value: '', text: ctx.t('filter.all') }),
         );
         if (control.nullLabel)
@@ -83,7 +85,7 @@ export default {
       } else {
         const input = el('input', {
           type: 'text',
-          'aria-label': ctx.localized(control.label) || control.field,
+          'aria-label': labelOf(control),
         });
         label.append(input);
         record.inputs.push(input);

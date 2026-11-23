@@ -1,6 +1,6 @@
 # Import files
 
-Run from the project: `npm run import -- <file-or-dir>...`. Use `--instance` or `WEBGIS_APP_DIR` for an external instance. Supported inputs are GeoJSON, all vector layers in a GeoPackage (`file.gpkg:layer` selects one), Shapefile plus its sidecars, and nonrecursive directories. Python 3.10+ is required; GDAL is found through `WEBGIS_OGR2OGR`, PATH, Windows QGIS or an already available Docker GDAL image.
+Run from the project: `npm run import -- <file-or-dir>...`. Use `--instance` or `WEBGIS_APP_DIR` for an external instance. Supported inputs are GeoJSON, all vector layers in a GeoPackage (`file.gpkg:layer` selects one), Shapefile plus its sidecars, and nonrecursive directories. Python 3.10+ is required. GDAL is not needed for EPSG:4326 GeoJSON imported with `--target geojson`; for GeoPackage, Shapefile or projected GeoJSON it is found through `WEBGIS_OGR2OGR`, PATH, Windows QGIS or an already available Docker GDAL image.
 
 Start with `--dry-run` for many/large inputs. It prints local recognition, SQL, password-free manifest and config diff, without network or file writes. Missing CRS is an explicit EPSG:4326 assumption; resolve uncertain source CRS before loading. Native PostGIS imports retain EPSG:7801 and other declared CRSs; local GeoJSON is transformed to EPSG:4326.
 

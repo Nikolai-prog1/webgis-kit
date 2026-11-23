@@ -79,6 +79,16 @@ export function createProject(target, options = {}) {
     destination,
   ]);
   run('git', ['-C', destination, 'remote', 'rename', 'origin', 'upstream']);
+  // upstream is for update-core fetches only; a push there would target the template.
+  run('git', [
+    '-C',
+    destination,
+    'remote',
+    'set-url',
+    '--push',
+    'upstream',
+    'no-push',
+  ]);
   if (
     run('git', ['branch', '--show-current'], destination, true).trim() !==
     'main'
@@ -105,6 +115,15 @@ export function createProject(target, options = {}) {
     config.app.title = options.name;
     config.branding = { ...config.branding, title: options.name };
   }
+  if (options.locale) {
+    if (!['en', 'bg'].includes(options.locale))
+      throw new Error('Supported --locale values: en, bg.');
+    config.app.locale = options.locale;
+    config.app.locales = [
+      options.locale,
+      ...(config.app.locales || []).filter((value) => value !== options.locale),
+    ];
+  }
   fs.writeFileSync(configFile, JSON.stringify(config, null, 2) + '\n');
   fs.mkdirSync(path.join(destination, '.webgis'), { recursive: true });
   fs.writeFileSync(
@@ -126,7 +145,7 @@ export function parseArgs(args) {
   let target;
   for (let index = 0; index < args.length; index++) {
     const value = args[index];
-    if (['--source', '--ref', '--name'].includes(value)) {
+    if (['--source', '--ref', '--name', '--locale'].includes(value)) {
       if (!args[index + 1] || args[index + 1].startsWith('--'))
         throw new Error(`Missing value for ${value}.`);
       options[value.slice(2)] = args[++index];
@@ -137,7 +156,7 @@ export function parseArgs(args) {
   }
   if (!target)
     throw new Error(
-      'Usage: node create-project.mjs <target-dir> [--source <git-url-or-path>] [--ref <tag>] [--name <title>] [--no-install] [--demo]',
+      'Usage: node create-project.mjs <target-dir> [--source <git-url-or-path>] [--ref <tag>] [--name <title>] [--locale en|bg] [--no-install] [--demo]',
     );
   return { target, options };
 }

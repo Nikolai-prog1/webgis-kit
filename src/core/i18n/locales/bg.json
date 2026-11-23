@@ -29,7 +29,7 @@
   "catalog.none": "Няма",
   "catalog.empty": "Няма избрани слоеве",
   "search.button": "Търси",
-  "search.placeholder": "Име или държава",
+  "search.placeholder": "Търсене",
   "search.noResults": "Няма намерени резултати.",
   "search.results": "Намерени: {count}",
   "search.missingGeometry": "{count} резултата нямат координати.",

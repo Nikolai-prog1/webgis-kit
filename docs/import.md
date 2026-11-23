@@ -1,6 +1,6 @@
 # Import vector data
 
-Run `npm run import -- <file-or-dir>...` from the project. Python 3.10+ is required. GeoJSON needs no Python packages; GeoPackage and Shapefile use GDAL (`WEBGIS_OGR2OGR`, PATH, Windows QGIS, then Docker). Directory discovery is nonrecursive. Use `file.gpkg:layer` to select one GeoPackage layer.
+Run `npm run import -- <file-or-dir>...` from the project. Python 3.10+ is required. EPSG:4326 GeoJSON needs no Python packages or GDAL; GeoPackage, Shapefile and projected GeoJSON use GDAL (`WEBGIS_OGR2OGR`, PATH, Windows QGIS, then Docker). Directory discovery is nonrecursive. Use `file.gpkg:layer` to select one GeoPackage layer.
 
 ```sh
 npm run import -- ./data --target geojson --dry-run
