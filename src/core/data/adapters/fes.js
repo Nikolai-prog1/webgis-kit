@@ -52,7 +52,14 @@ const OUTPUT_FORMAT_ERROR = /output ?format/i;
 export function createFesAdapter(services, projection) {
   const cache = new Map();
   const gmlOnly = new Set();
-  const format = new WFS({ version: '2.0.0' });
+  // WFS 2.0 by default; services that speak only 1.x (QGIS Server: 1.0/1.1)
+  // set wfsVersion, which selects the request encoding and filter namespace.
+  const formats = new Map();
+  const versionOf = (id) => services.get(id).wfsVersion || '2.0.0';
+  const formatOf = (version) => {
+    if (!formats.has(version)) formats.set(version, new WFS({ version }));
+    return formats.get(version);
+  };
   const serviceId = (def) => def.query?.service || def.source.service;
   const name = (def) =>
     services.qualified(
@@ -66,11 +73,12 @@ export function createFesAdapter(services, projection) {
         key,
         (async () => {
           const url = new URL(services.wfsUrl(serviceId(def)));
+          const version = versionOf(serviceId(def));
           url.search = new URLSearchParams({
             service: 'WFS',
-            version: '2.0.0',
+            version,
             request: 'DescribeFeatureType',
-            typeNames: name(def),
+            [version.startsWith('2') ? 'typeNames' : 'typeName']: name(def),
           }).toString();
           const xml = new DOMParser().parseFromString(
             await (await request(url)).text(),
@@ -136,6 +144,9 @@ export function createFesAdapter(services, projection) {
         ]
       : undefined;
     const id = serviceId(def);
+    const version = versionOf(id);
+    const legacy = !version.startsWith('2');
+    const format = formatOf(version);
     const body = (json) => {
       const node = format.writeGetFeature({
         featureNS: service.featureNS || description.namespace,
@@ -143,7 +154,7 @@ export function createFesAdapter(services, projection) {
         featureTypes: [parts.at(-1)],
         srsName: WFS_CRS,
         ...(json ? { outputFormat: 'application/json' } : {}),
-        count: options.limit,
+        ...(legacy ? { maxFeatures: options.limit } : { count: options.limit }),
         startIndex: options.offset,
         propertyNames: properties,
         filter: toFes(options.where),
@@ -153,16 +164,24 @@ export function createFesAdapter(services, projection) {
     };
     function appendSortBy(node) {
       if (!options.sortBy?.length) return;
-      const namespace = 'http://www.opengis.net/fes/2.0';
-      const sortBy = document.createElementNS(namespace, 'fes:SortBy');
+      const [namespace, prefix, reference] = legacy
+        ? ['http://www.opengis.net/ogc', 'ogc', 'PropertyName']
+        : ['http://www.opengis.net/fes/2.0', 'fes', 'ValueReference'];
+      const sortBy = document.createElementNS(namespace, `${prefix}:SortBy`);
       for (const sort of options.sortBy) {
         const property = document.createElementNS(
           namespace,
-          'fes:SortProperty',
+          `${prefix}:SortProperty`,
         );
-        const field = document.createElementNS(namespace, 'fes:ValueReference');
+        const field = document.createElementNS(
+          namespace,
+          `${prefix}:${reference}`,
+        );
         field.textContent = sort.field;
-        const order = document.createElementNS(namespace, 'fes:SortOrder');
+        const order = document.createElementNS(
+          namespace,
+          `${prefix}:SortOrder`,
+        );
         order.textContent = sort.dir === 'desc' ? 'DESC' : 'ASC';
         property.append(field, order);
         sortBy.append(property);
@@ -211,7 +230,7 @@ export function createFesAdapter(services, projection) {
     // Read in geographic coordinates (GML srsName decides the axis order),
     // then clip polar latitudes before projecting, as for GeoJSON.
     const features = projectGeographicFeatures(
-      format.readFeatures(xml, {
+      formatOf(version).readFeatures(xml, {
         dataProjection: WFS_CRS,
         featureProjection: WFS_CRS,
       }),

@@ -232,3 +232,40 @@ test('CSV has BOM escapes quotes and neutralizes formulas', () => {
     ),
   ).toBe('\uFEFF"a"\r\n"\'=1+1"\r\n"say ""hello"""');
 });
+test('FES speaks WFS 1.1 to servers that set wfsVersion (QGIS Server)', async () => {
+  let posted = '';
+  let described = '';
+  const fetch = vi.fn(async (url, options) => {
+    if (options?.method === 'POST') {
+      posted = options.body;
+      return json(data);
+    }
+    described = String(url);
+    return new Response(
+      '<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.qgis.org/gml"><xsd:complexType name="placesType"><xsd:sequence><xsd:element name="name" type="xsd:string"/><xsd:element name="geometry" type="gml:PointPropertyType"/></xsd:sequence></xsd:complexType></xsd:schema>',
+    );
+  });
+  vi.stubGlobal('fetch', fetch);
+  const services = createServices({
+    services: {
+      main: {
+        type: 'wfs',
+        url: 'https://example.com/ows',
+        wfsVersion: '1.1.0',
+      },
+    },
+  });
+  await createFesAdapter(services, 'EPSG:3857').features(def, {
+    where: { field: 'name', op: 'ilike', value: '%Sof%' },
+    limit: 10,
+    sortBy: [{ field: 'name', dir: 'asc' }],
+  });
+  expect(new URL(described).searchParams.get('version')).toBe('1.1.0');
+  expect(new URL(described).searchParams.get('typeName')).toBe('places');
+  expect(posted).toContain('version="1.1.0"');
+  expect(posted).toContain('maxFeatures="10"');
+  expect(posted).not.toContain('fes:');
+  expect(posted).toContain('ogc:PropertyName');
+  expect(posted).toContain('ogc:SortBy');
+  vi.unstubAllGlobals();
+});
