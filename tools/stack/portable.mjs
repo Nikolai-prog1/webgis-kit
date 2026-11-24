@@ -58,6 +58,59 @@ export function preparePortableLibraries(bin) {
     fs.copyFileSync(complete, bundled);
   }
 }
+// Downloads to a .part file that is renamed only when complete and a ZIP, so
+// an interrupted transfer or a mirror's HTML page is never reused as an
+// archive. curl (bundled with Windows 10+) is preferred: it follows mirror
+// redirects and retries; Node's fetch is the fallback.
+async function download(url, target, name) {
+  const part = target + '.part';
+  fs.rmSync(part, { force: true });
+  const curl = spawnSync('curl', ['--version'], { stdio: 'ignore' });
+  if (!curl.error && curl.status === 0) {
+    const result = spawnSync(
+      'curl',
+      [
+        '-fsSL',
+        '--retry',
+        '4',
+        '--retry-delay',
+        '5',
+        '--connect-timeout',
+        '30',
+        '-A',
+        'webgis-kit',
+        '-o',
+        part,
+        url,
+      ],
+      { stdio: 'inherit' },
+    );
+    if (result.status !== 0) {
+      fs.rmSync(part, { force: true });
+      throw new Error(
+        `Download failed for ${name}. Use --downloads with official archives.`,
+      );
+    }
+  } else {
+    const response = await fetch(url, { signal: AbortSignal.timeout(600000) });
+    if (!response.ok)
+      throw new Error(
+        `Download failed (${response.status}) for ${name}. Use --downloads with official archives.`,
+      );
+    await pipeline(Readable.fromWeb(response.body), fs.createWriteStream(part));
+  }
+  const head = Buffer.alloc(2);
+  const handle = fs.openSync(part, 'r');
+  fs.readSync(handle, head, 0, 2, 0);
+  fs.closeSync(handle);
+  if (head.toString('latin1') !== 'PK') {
+    fs.rmSync(part, { force: true });
+    throw new Error(
+      `${name} did not download as a ZIP archive (the mirror returned another page). Retry, or use --downloads with official archives.`,
+    );
+  }
+  fs.renameSync(part, target);
+}
 async function archives(root, source) {
   const directory = path.join(root, '.local-stack/downloads');
   fs.mkdirSync(directory, { recursive: true });
@@ -104,17 +157,7 @@ async function archives(root, source) {
             /* the pinned publisher checksum remains available */
           }
         console.log(`Downloading ${asset.name}`);
-        const response = await fetch(url, {
-          signal: AbortSignal.timeout(600000),
-        });
-        if (!response.ok)
-          throw new Error(
-            `Download failed (${response.status}) for ${asset.name}. Use --downloads with official archives.`,
-          );
-        await pipeline(
-          Readable.fromWeb(response.body),
-          fs.createWriteStream(target),
-        );
+        await download(url, target, asset.name);
       }
     }
     const digest = await hash(target);

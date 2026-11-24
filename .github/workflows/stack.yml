@@ -89,7 +89,7 @@ jobs:
           mkdir -p .cache/osm && cd .cache/osm
           curl -sSfL -o bulgaria.zip https://download.geofabrik.de/europe/bulgaria-latest-free.shp.zip
           unzip -q -o bulgaria.zip 'gis_osm_buildings_a_free_1.*'
-          ogr2ogr -f GPKG sofia_buildings.gpkg gis_osm_buildings_a_free_1.shp -nln sofia_buildings -spat 23.10 42.55 23.60 42.80
+          ogr2ogr -f GPKG sofia_buildings.gpkg gis_osm_buildings_a_free_1.shp -nln sofia_buildings -spat 22.90 42.40 23.80 42.95
           ogrinfo -so sofia_buildings.gpkg sofia_buildings | grep -E "Feature Count|Geometry"
           echo "WEBGIS_IMPORT_SEARCH_VALUE=$(ogrinfo -q -sql "SELECT name FROM sofia_buildings WHERE name IS NOT NULL AND length(name) > 5 LIMIT 1" sofia_buildings.gpkg | sed -n 's/.*name (String) = //p' | head -1)" >> "$GITHUB_ENV"
       - run: npm run stack -- up --mode docker
@@ -140,10 +140,14 @@ jobs:
             python3 /data/make_project.py /data/demo.gpkg /data/demo.qgs
       - name: Serve it with QGIS Server
         run: |
+          image=qgis/qgis-server:${{ matrix.qgis }}
+          docker pull -q $image
+          server=$(docker run --rm --entrypoint sh $image -c 'command -v qgis_mapserver || find / -name "qgis_mapserver*" -type f 2>/dev/null | head -1')
+          echo "QGIS Server binary: $server"
           docker run -d --name qgis -p 8081:8080 -v "$PWD/.cache/qgis:/data" \
             -e QGIS_PROJECT_FILE=/data/demo.qgs -e QT_QPA_PLATFORM=offscreen \
             -e QGIS_SERVER_LOG_STDERR=1 -e QGIS_SERVER_LOG_LEVEL=0 \
-            qgis/qgis:${{ matrix.qgis }} qgis_mapserver 0.0.0.0:8080
+            --entrypoint "$server" $image 0.0.0.0:8080
           for i in $(seq 1 60); do
             curl -sf "http://127.0.0.1:8081/ows?SERVICE=WMS&REQUEST=GetCapabilities" -o caps.xml && break
             sleep 2
@@ -184,9 +188,12 @@ jobs:
       - name: Install PostgreSQL and PostGIS with Homebrew
         run: |
           brew install postgis
-          PG=$(brew deps postgis | grep -o '^postgresql@[0-9]*' | head -1)
-          echo "Using $PG"
-          echo "$(brew --prefix $PG)/bin" >> "$GITHUB_PATH"
+          brew deps postgis | grep -i postgres || true
+          # PostGIS is built against one PostgreSQL formula; use that one's binaries.
+          PGBIN=$(ls -d "$(brew --prefix)"/opt/postgresql@*/bin | sort -V | tail -1)
+          echo "Using $PGBIN"
+          test -x "$PGBIN/initdb"
+          echo "$PGBIN" >> "$GITHUB_PATH"
       - name: Start PostgreSQL with an application role
         run: |
           initdb -D "$RUNNER_TEMP/pg" -U postgres --auth=trust -E UTF8 > /dev/null
