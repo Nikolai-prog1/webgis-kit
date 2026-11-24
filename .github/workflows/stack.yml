@@ -226,7 +226,6 @@ jobs:
         env:
           WEBGIS_LIVE_GEOSERVER: '1'
           WEBGIS_LIVE_INSTANCE: app
-          GEOSERVER_URL: http://localhost:8080
       - if: failure()
         run: tail -100 "$RUNNER_TEMP/gs.log" "$RUNNER_TEMP/pg.log"
       - uses: actions/upload-artifact@v7
