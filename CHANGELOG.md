@@ -2,6 +2,25 @@
 
 This file follows Keep a Changelog. The initial release is 0.1.0.
 
+## [0.3.0] - 2026-11-24
+
+### Added
+
+- Any coordinate system. Imports read GeoJSON `crs`, `.prj` and GeoPackage systems, reproject systems without an EPSG code through GDAL, and refuse undeclared projected data until `--srs EPSG:<code>` or `--srs file.prj` names the source.
+- `npm run crs -- add <EPSG:code | file.prj | PROJ string>` adds a system to coordinate display, go-to and markers; `--map` draws the map in it (`map.projection`). Common European/Balkan systems and all UTM zones resolve offline.
+- `map.openAtHome` frames `map.homeExtent` on load in any projection; imports set it.
+- QGIS Server support through WFS 1.0/1.1 (`wfsVersion`), with a complete [example](examples/configs/qgis-server).
+- Supported agents are Claude Code and Codex; the README install command targets both.
+- Tests on Windows, macOS and Linux; Docker matrix with PostGIS 13–17 and GeoServer 2.25–3.0; QGIS Server 3.44 LTR and 4.4; macOS with existing Homebrew servers; the Windows portable stack downloaded from the publishers; 182,775 OSM buildings.
+
+### Fixed
+
+- The Windows portable stack could not download GeoServer: Node's fetch crashed on the mirror redirect. Downloads now use curl when available, never reuse a partial file and accept only complete ZIP archives.
+- Search boxes without their own text show the layer title and field labels, so renaming them relabels the search.
+- The identify popup stays inside the map near its edges.
+- `npm run smoke` reports blocked basemap tiles (offline machines, company proxies) as a warning instead of failing.
+- Project bootstrap no longer prints Git detached-HEAD advice or a refspec warning.
+
 ## [0.2.3] - 2026-11-23
 
 Findings from an independent first-use test (fresh machine, skill installed from GitHub).

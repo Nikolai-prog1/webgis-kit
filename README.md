@@ -74,6 +74,20 @@ Start with [AGENTS.md](AGENTS.md) and [the WebGIS skill](skills/webgis/SKILL.md)
 
 The required cycle is edit → validate → dev server → browser verification. `npm run smoke` builds a temporary preview and checks the configured data/services and Chromium; without Chromium it reports HTTP-only verification. Use instance plugins for behavior that JSON cannot express; [plugin API](docs/plugins.md).
 
+## Tested on
+
+Every change runs these checks in GitHub Actions ([Checks](.github/workflows/ci.yml), [Stack integration](.github/workflows/stack.yml)):
+
+| Area                | Covered                                                                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Operating systems   | Windows, macOS and Linux: unit, Python and browser tests; installing the skill for Claude Code and Codex, bootstrapping a project, importing and verifying it in Chromium |
+| Agents              | Claude Code and Codex (the skill and `AGENTS.md`)                                                                                                                         |
+| PostGIS / GeoServer | PostgreSQL 17 + PostGIS 3.7 with GeoServer 3.0.2; PostGIS 16-3.5 with GeoServer 2.28; PostGIS 13-3.1 with GeoServer 2.25                                                  |
+| Other servers       | QGIS Server 3.44 LTR and 4.4 (WMS + WFS 1.1), MapServer WFS                                                                                                               |
+| Server setups       | Docker; Windows portable stack downloaded from the publishers (no Docker, no administrator); existing servers (Homebrew PostGIS and GeoServer on macOS)                   |
+| Coordinate systems  | Imports declared, undeclared (`--srs`) and EPSG-less `.prj`/GeoPackage systems; BGS2005 (EPSG:7801) as the map projection; Cyrillic search on BGS2005 data in PostGIS     |
+| Data volume         | 182,775 OpenStreetMap building polygons for greater Sofia in PostGIS: import in 25 s; first table page 0.2 s, next page, sorting and search under 0.2 s each              |
+
 ## Build, deploy and maintain
 
 `npm run build` produces `dist/`; [deployment recipes](docs/deployment.md) cover static hosting, Nginx, IIS and temporary preview. Edit deployed `config/app.json` without rebuilding; plugin/theme changes need a build. Vite proxy configuration is for development/preview, so configure a production reverse proxy separately. Backend authorization remains the server's responsibility.
