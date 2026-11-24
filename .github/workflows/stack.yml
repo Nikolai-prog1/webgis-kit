@@ -87,7 +87,7 @@ jobs:
       - name: Download OpenStreetMap buildings and clip Sofia
         run: |
           mkdir -p .cache/osm && cd .cache/osm
-          curl -sSfL -o bulgaria.zip https://download.geofabrik.de/europe/bulgaria-latest-free.shp.zip
+          curl -sSfL --retry 5 --retry-all-errors --retry-delay 20 -o bulgaria.zip https://download.geofabrik.de/europe/bulgaria-latest-free.shp.zip
           unzip -q -o bulgaria.zip 'gis_osm_buildings_a_free_1.*'
           ogr2ogr -f GPKG sofia_buildings.gpkg gis_osm_buildings_a_free_1.shp -nln sofia_buildings -spat 22.90 42.40 23.80 42.95
           ogrinfo -so sofia_buildings.gpkg sofia_buildings | grep -E "Feature Count|Geometry"
@@ -170,7 +170,8 @@ jobs:
 
   macos-existing:
     name: macOS with native PostGIS and GeoServer (existing mode)
-    runs-on: macos-latest
+    # Intel macOS: arm64 macOS runners are often queued for a long time.
+    runs-on: macos-15-intel
     timeout-minutes: 40
     defaults:
       run:
@@ -202,7 +203,7 @@ jobs:
           psql -U postgres -d webgis -c "CREATE EXTENSION postgis"
       - name: Start GeoServer from the official binary
         run: |
-          curl -sSfL -o "$RUNNER_TEMP/gs.zip" https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-bin.zip/download
+          curl -sSfL --retry 5 --retry-all-errors --retry-delay 20 -o "$RUNNER_TEMP/gs.zip" https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-bin.zip/download
           unzip -q "$RUNNER_TEMP/gs.zip" -d "$RUNNER_TEMP/geoserver"
           export GEOSERVER_HOME="$RUNNER_TEMP/geoserver"
           nohup sh "$GEOSERVER_HOME/bin/startup.sh" > "$RUNNER_TEMP/gs.log" 2>&1 &
