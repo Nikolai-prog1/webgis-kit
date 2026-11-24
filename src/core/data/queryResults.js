@@ -1,3 +1,4 @@
+import { mapZoom } from '../map/createMap.js';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
 import VectorLayer from 'ol/layer/Vector.js';
@@ -77,7 +78,7 @@ export function createResults(ctx, options, kind) {
       options.zoomTo !== false
     )
       ctx.view.fit(geometry.getExtent(), {
-        maxZoom: options.maxZoom || 12,
+        maxZoom: mapZoom(ctx.view, options.maxZoom || 12),
         padding: [70, 70, 70, 70],
         duration: matchMedia('(prefers-reduced-motion: reduce)').matches
           ? 0
@@ -167,7 +168,7 @@ export function createResults(ctx, options, kind) {
       if (extent.every(Number.isFinite) && options.zoomTo !== false)
         ctx.view.fit(extent, {
           padding: [70, 70, 70, 70],
-          maxZoom: options.maxZoom || 12,
+          maxZoom: mapZoom(ctx.view, options.maxZoom || 12),
           duration: matchMedia('(prefers-reduced-motion: reduce)').matches
             ? 0
             : 350,

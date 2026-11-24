@@ -12,7 +12,7 @@ Any coordinate system the user names can be used in three places. Each is indepe
 
 The importer reads the system the data declare: GeoJSON `crs`, a Shapefile's `.prj`, a GeoPackage's registered system. With `--target geojson` everything becomes longitude/latitude (EPSG:4326). With PostGIS an EPSG-coded system is kept as the table's native system; GeoServer serves it and the map receives it in longitude/latitude. A system without an EPSG code (a local or historical grid, a custom `.prj`) is reprojected to EPSG:4326 through GDAL.
 
-When data carry no declaration and their numbers are not longitude/latitude, the import stops and asks for the source system; never guess it. Pass it with `--srs`: an EPSG code (`--srs EPSG:7801`), a `.prj`/`.wkt` file (`--srs path/to/file.prj`) or a WKT/PROJ string. Ask the user which system the data are in when the file name, metadata or accompanying documents do not say. Reprojection needs GDAL (QGIS includes it; see [import](import.md)).
+When data carry no declaration and their numbers are not longitude/latitude, the import stops and asks for the source system; never guess it. Pass it with `--srs`: an EPSG code (`--srs EPSG:7801`), a `.prj`/`.wkt` file (`--srs path/to/file.prj`) or a WKT/PROJ string. Ask the user which system the data are in when the file name, metadata or accompanying documents do not say. `--srs` applies to every file in that command, so import files in different systems in separate commands. Reprojection needs GDAL (QGIS includes it; see [import](import.md)).
 
 ## Adding a system to the map
 

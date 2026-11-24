@@ -1,6 +1,6 @@
 {
   "name": "webgis",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Create a 2D web GIS from GeoJSON, GeoPackage, Shapefile or existing PostGIS/GeoServer, including local stacks, import and browser verification.",
   "author": {
     "name": "Nikolai-prog1"

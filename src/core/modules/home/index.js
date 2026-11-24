@@ -1,4 +1,5 @@
 import { fromLonLat, transformExtent } from 'ol/proj.js';
+import { mapZoom } from '../../map/createMap.js';
 export default {
   id: 'home',
   kind: 'tool',
@@ -23,7 +24,7 @@ export default {
         else
           ctx.view.animate({
             center: fromLonLat(ctx.config.map.center, ctx.view.getProjection()),
-            zoom: ctx.config.map.zoom,
+            zoom: mapZoom(ctx.view, ctx.config.map.zoom),
             duration,
           });
       },

@@ -1,3 +1,4 @@
+import { mapZoom } from '../../map/createMap.js';
 import { el } from '../../ui/dom.js';
 import { ensureMarkers } from '../marker/index.js';
 export default {
@@ -38,8 +39,8 @@ export default {
       ctx.view.animate({
         center: parsed.coordinate,
         zoom: Math.min(
-          ctx.config.map.maxZoom,
-          Math.max(18, ctx.view.getZoom()),
+          ctx.view.getMaxZoom(),
+          Math.max(mapZoom(ctx.view, 18), ctx.view.getZoom()),
         ),
         duration: matchMedia('(prefers-reduced-motion: reduce)').matches
           ? 0

@@ -1,3 +1,4 @@
+import { mapZoom } from '../../map/createMap.js';
 import VectorLayer from 'ol/layer/Vector.js';
 import VectorSource from 'ol/source/Vector.js';
 import { el, button } from '../../ui/dom.js';
@@ -112,7 +113,7 @@ export function setupAttributeTable(ctx) {
             if (feature.getGeometry()) {
               source.addFeature(feature.clone());
               ctx.view.fit(feature.getGeometry().getExtent(), {
-                maxZoom: 14,
+                maxZoom: mapZoom(ctx.view, 14),
                 padding: [60, 60, 350, 60],
               });
             } else ctx.ui.toast(ctx.t('app.noGeometry'), 'warning');

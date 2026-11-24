@@ -1,3 +1,4 @@
+import { mapZoom } from '../../map/createMap.js';
 import { el, button } from '../../ui/dom.js';
 import {
   legendEntries,
@@ -188,7 +189,7 @@ export default {
                   'EPSG:4326',
                   ctx.view.getProjection(),
                 ),
-                { padding: [35, 35, 35, 35], maxZoom: 17 },
+                { padding: [35, 35, 35, 35], maxZoom: mapZoom(ctx.view, 17) },
               ),
             ),
           );

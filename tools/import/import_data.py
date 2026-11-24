@@ -309,7 +309,8 @@ def configure(config, items, target, service, workspace, section=None, search='a
         controls = []
         if filters == 'auto' and not few:
             for key,field in item['fields'].items():
-                if key == item['primary'] or field['type'] == 'jsonb': continue
+                # A field already searchable by text does not also need a dropdown.
+                if key == item['primary'] or field['type'] == 'jsonb' or key in selected: continue
                 if field['type'] in ('bigint','double precision'): kind = 'range'
                 elif field['type'] in ('text','boolean') and field['distinct'] <= 50: kind = 'select'
                 else: continue

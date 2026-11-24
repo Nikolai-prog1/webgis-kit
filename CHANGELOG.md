@@ -2,6 +2,19 @@
 
 This file follows Keep a Changelog. The initial release is 0.1.0.
 
+## [0.3.1] - 2026-11-24
+
+Findings from independent Claude and Codex runs of 0.3.0 (Codex built a Windows portable PostGIS/GeoServer map drawn in BGS2005).
+
+### Fixed
+
+- Zoom limits keep their meaning in any map projection: configured zoom levels and the search, table, catalog and go-to limits are Web Mercator levels converted to the same ground resolution, so a search no longer zooms to a 20 m scale in BGS2005.
+- Imports no longer add a dropdown filter for a field that already has the text search.
+
+### Changed
+
+- Documentation: `--srs` applies to all files of one import command; when GDAL is needed.
+
 ## [0.3.0] - 2026-11-24
 
 ### Added
