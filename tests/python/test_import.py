@@ -81,7 +81,7 @@ class ImportTests(unittest.TestCase):
         controls = next(b for b in blocks if b['type'] == 'attribute-filter')['controls']
         self.assertIn({'type':'range','field':'value'},controls)
         self.assertIn({'type':'select','field':'category','values':'auto'},controls)
-        self.assertEqual(next(b for b in blocks if b['type'] == 'attribute-search')['placeholder'],'Име')
+        self.assertNotIn('placeholder',next(b for b in blocks if b['type'] == 'attribute-search'))
         self.assertTrue(updated['layers'][0]['fields']['id']['hidden'])
         self.assertEqual(module.configure(updated,[item],'geojson','main','fixture')['sidebar'][-1]['blocks'],blocks)
 

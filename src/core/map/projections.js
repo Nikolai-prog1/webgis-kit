@@ -1,7 +1,9 @@
 import proj4 from 'proj4';
 import { register } from 'ol/proj/proj4.js';
 import { get, transform, fromLonLat } from 'ol/proj.js';
+import { mapProjection } from './createMap.js';
 export function createCrs(config, locale = 'en') {
+  const view = mapProjection(config);
   for (const item of config.crs)
     if (item.proj4) proj4.defs(item.code, item.proj4);
   register(proj4);
@@ -13,7 +15,7 @@ export function createCrs(config, locale = 'en') {
   }
   function format(coordinate, code) {
     const item = config.crs.find((item) => item.code === code);
-    const xy = transform(coordinate, 'EPSG:3857', code);
+    const xy = transform(coordinate, view, code);
     const ordered = item.axisOrder === 'ne' ? [xy[1], xy[0]] : xy;
     return ordered
       .map(
@@ -72,7 +74,11 @@ export function createCrs(config, locale = 'en') {
             Math.abs(xy[1]) <= 90 &&
             (!bounds.length || bounds.some((bbox) => inside(xy, bbox)))
           )
-            return { coordinate: fromLonLat(xy), code: item.code, values: xy };
+            return {
+              coordinate: fromLonLat(xy, view),
+              code: item.code,
+              values: xy,
+            };
       } else if (item.kind === 'projected' && item.bbox) {
         for (const xy of [
           [a, b],
@@ -80,7 +86,7 @@ export function createCrs(config, locale = 'en') {
         ])
           if (inside(xy, item.bbox))
             return {
-              coordinate: transform(xy, item.code, 'EPSG:3857'),
+              coordinate: transform(xy, item.code, view),
               code: item.code,
               values: xy,
             };

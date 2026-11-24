@@ -185,6 +185,12 @@
           },
           "minItems": 4,
           "maxItems": 4
+        },
+        "openAtHome": {
+          "type": "boolean"
+        },
+        "projection": {
+          "type": "string"
         }
       },
       "required": ["center", "zoom"],

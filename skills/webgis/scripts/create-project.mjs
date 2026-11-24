@@ -69,7 +69,12 @@ export function createProject(target, options = {}) {
     throw new Error('Provide a branch or version tag for --ref.');
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   run('git', [
+    '-c',
+    'advice.detachedHead=false',
     'clone',
+    '--quiet',
+    '--origin',
+    'upstream',
     '--depth',
     '1',
     '--branch',
@@ -78,7 +83,6 @@ export function createProject(target, options = {}) {
     source,
     destination,
   ]);
-  run('git', ['-C', destination, 'remote', 'rename', 'origin', 'upstream']);
   // upstream is for update-core fetches only; a push there would target the template.
   run('git', [
     '-C',

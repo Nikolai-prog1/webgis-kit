@@ -69,8 +69,9 @@ export function createPopup(ctx, formatters = new Map()) {
           ),
         );
       }
-      overlay.setPosition(options.coordinate || ctx.view.getCenter());
+      // Visible first: auto-pan measures the popup to keep it inside the map.
       node.hidden = false;
+      overlay.setPosition(options.coordinate || ctx.view.getCenter());
     },
     showFeature(def, feature, coordinate) {
       const properties = feature.getProperties();

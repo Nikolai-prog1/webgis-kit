@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgis/postgis:17-3.7
+    image: ${WEBGIS_POSTGIS_IMAGE:-postgis/postgis:17-3.7}
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 60
   geoserver:
-    image: docker.osgeo.org/geoserver:3.0.2
+    image: ${WEBGIS_GEOSERVER_IMAGE:-docker.osgeo.org/geoserver:3.0.2}
     environment:
       GEOSERVER_ADMIN_USER: ${GEOSERVER_USER:-admin}
       GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_PASSWORD:?Run npm run stack -- up --mode docker}

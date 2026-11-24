@@ -1,0 +1,72 @@
+{
+  "type": "FeatureCollection",
+  "name": "region-7801",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:EPSG::7801"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "код": 1,
+        "име": "София",
+        "население_хил": 1260
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [321559.18, 4731436.07]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "код": 2,
+        "име": "Пловдив",
+        "население_хил": 345
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [437607.62, 4666958.02]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "код": 3,
+        "име": "Варна",
+        "население_хил": 334
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [696180.95, 4789304.09]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "код": 4,
+        "име": "Бургас",
+        "население_хил": 206
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [661286.72, 4709582.6]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "код": 5,
+        "име": "Русе",
+        "население_хил": 140
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [537862.28, 4855661.43]
+      }
+    }
+  ]
+}

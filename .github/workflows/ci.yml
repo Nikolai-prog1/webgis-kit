@@ -4,7 +4,16 @@ permissions:
   contents: read
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    name: checks (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # micromamba's environment (Python + GDAL) is active in login shells.
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -13,14 +22,87 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - run: npm ci
-      - uses: actions/setup-python@v7
+      - uses: mamba-org/setup-micromamba@v2
         with:
-          python-version: '3.13'
+          environment-name: gis
+          create-args: python=3.13 gdal
+          cache-environment: true
+      - run: ogr2ogr --version && python --version
+      - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run check
+        if: runner.os == 'Linux'
+      - run: npx playwright install chromium
+        if: runner.os != 'Linux'
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:python
+      - run: npm run validate
+      - run: npm run build
+      - run: npm run test:e2e
+      - run: npm run leak-check
+        if: runner.os == 'Linux'
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: browser-traces
+          name: browser-traces-${{ matrix.os }}
           path: test-results/
+
+  # A user's first steps on each system: install the skill from this checkout,
+  # bootstrap a project, import data in two coordinate systems, verify in a browser.
+  first-use:
+    name: first use without a server (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: kit
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: kit/.nvmrc
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-name: gis
+          create-args: python=3.13 gdal
+          cache-environment: true
+      - name: Tag this commit so the bootstrap can clone it
+        run: git -C kit tag -f ci-first-use
+      - name: Install the skill for Claude Code and Codex
+        run: |
+          mkdir work && cd work
+          npx -y skills add "$GITHUB_WORKSPACE/kit" --skill webgis -a claude-code -a codex -y
+          test -f .agents/skills/webgis/SKILL.md
+          test -e .claude/skills/webgis/SKILL.md
+      - name: Bootstrap a project
+        run: |
+          cd work
+          node .agents/skills/webgis/scripts/create-project.mjs map --name "First use" --locale en --source "$GITHUB_WORKSPACE/kit" --ref ci-first-use
+          test "$(git -C map remote get-url --push upstream)" = no-push
+      - name: Import longitude/latitude and BGS2005 data
+        run: |
+          cd work/map
+          npm run stack -- up --mode none
+          ogr2ogr -f GeoJSON ../bare-7801.geojson examples/configs/demo/static/data/cities.geojson -t_srs EPSG:7801 -lco WRITE_NAME=NO
+          python -c "import json;p='../bare-7801.geojson';d=json.load(open(p,encoding='utf-8'));d.pop('crs',None);json.dump(d,open(p,'w',encoding='utf-8'))"
+          if npm run import -- ../bare-7801.geojson; then echo "undeclared projected data must be refused"; exit 1; fi
+          npm run import -- ../bare-7801.geojson --srs EPSG:7801
+          npm run import -- examples/configs/demo/static/data/rivers.geojson
+          npm run crs -- add EPSG:7801 --map
+          npm run validate
+      - run: npx playwright install chromium
+        working-directory: work/map
+      - name: Verify in a browser
+        working-directory: work/map
+        run: npm run smoke -- --screenshot ../../first-use.png
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: first-use-${{ matrix.os }}
+          path: first-use.png

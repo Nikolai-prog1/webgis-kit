@@ -5,21 +5,28 @@ export default {
   id: 'attribute-search',
   kind: 'block',
   setup(ctx, options, mount) {
+    // Unset text follows the layer: its title labels the box and its field
+    // labels describe what can be typed, so renaming them relabels the search.
+    const def = ctx.layers?.get(options.layer)?.def;
+    const label =
+      ctx.localized(options.label) ||
+      ctx.localized(def?.title) ||
+      ctx.t('search.placeholder');
+    const hint =
+      ctx.localized(options.placeholder) ||
+      (options.fields || [])
+        .map((field) => ctx.localized(def?.fields?.[field]?.label) || field)
+        .join(', ') ||
+      ctx.t('search.placeholder');
     const input = el('input', {
       type: 'search',
-      placeholder:
-        ctx.localized(options.placeholder) || ctx.t('search.placeholder'),
-      'aria-label': ctx.localized(options.label) || ctx.t('search.placeholder'),
+      placeholder: hint,
+      'aria-label': label,
     });
     const form = el(
       'form',
       {},
-      el(
-        'label',
-        { class: 'wg-field' },
-        ctx.localized(options.label) || ctx.t('search.placeholder'),
-        input,
-      ),
+      el('label', { class: 'wg-field' }, label, input),
     );
     const status = el('div', { class: 'wg-muted', 'aria-live': 'polite' });
     const results = createResults(ctx, options, 'search');

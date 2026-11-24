@@ -209,8 +209,25 @@ export async function smoke(args = process.argv.slice(2)) {
           }),
           errors = [];
         page.on('pageerror', (error) => errors.push(error.message));
+        // Basemap tiles come from outside hosts that a firewall or proxy may
+        // block; that leaves the background empty but the data map intact.
+        const external = basemapHosts(config);
+        let blockedTiles = 0;
         page.on('console', (message) => {
-          if (message.type() === 'error') errors.push(message.text());
+          if (message.type() !== 'error') return;
+          const source = message.location()?.url;
+          let host = '';
+          try {
+            host = source ? new URL(source).host : '';
+          } catch {
+            // not a URL
+          }
+          if (
+            /^Failed to load resource/.test(message.text()) &&
+            external.has(host)
+          )
+            blockedTiles++;
+          else errors.push(message.text());
         });
         await page.goto(base, { waitUntil: 'networkidle' });
         await page.locator('.ol-viewport').waitFor();
@@ -227,6 +244,10 @@ export async function smoke(args = process.argv.slice(2)) {
           });
           await page.screenshot({ path: screenshot, fullPage: true });
         }
+        if (blockedTiles)
+          console.log(
+            `Warning: ${blockedTiles} basemap tile request(s) failed (${[...external].join(', ')} unreachable from this network). The data layers are unaffected; use the no-basemap choice or a reachable basemap.`,
+          );
         console.log('Browser: map rendered; no console/page errors.');
       }
     }
@@ -295,4 +316,20 @@ async function launchInstalled(chromium) {
     }
   }
   return null;
+}
+
+// Hosts serving the configured basemaps (OpenStreetMap and any XYZ/WMS URL).
+export function basemapHosts(config) {
+  const hosts = new Set();
+  for (const item of config.basemaps?.items || []) {
+    if (item.type === 'osm') hosts.add('tile.openstreetmap.org');
+    for (const value of [item.url, ...(item.urls || [])].filter(Boolean))
+      try {
+        const url = new URL(value.replace(/\{[a-z]-[a-z]\}/g, 'a'));
+        if (/^https?:$/.test(url.protocol)) hosts.add(url.host);
+      } catch {
+        // relative URLs are local and must load
+      }
+  }
+  return hosts;
 }

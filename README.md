@@ -6,7 +6,7 @@ A configurable web map for GIS specialists and developers. Edit one instance dir
 
 > Use the webgis skill to create a 2D web GIS from my data.
 
-Install the skill for your project with `npx skills add Nikolai-prog1/webgis-kit --skill webgis`, or in Claude Code run `/plugin marketplace add Nikolai-prog1/webgis-kit` and `/plugin install webgis@webgis-kit`. A local checkout can also be used as the source. No global installation is needed.
+Supported agents: **Claude Code** and **Codex**. Install the skill for your project with `npx skills add Nikolai-prog1/webgis-kit --skill webgis -a claude-code -a codex`, or in Claude Code run `/plugin marketplace add Nikolai-prog1/webgis-kit` and `/plugin install webgis@webgis-kit`. Codex also reads the project's [AGENTS.md](AGENTS.md). A local checkout can also be used as the source. No global installation is needed.
 
 The skill works from an empty/nonproject folder: it bootstraps a versioned project, selects local GeoJSON, existing servers, a Windows portable stack or Docker, imports GeoJSON/GeoPackage/Shapefile, and adds layers, identify, tables, search and filters. It applies your title/languages/logo and verifies the map. See [new project](skills/webgis/references/new-project.md), [import](docs/import.md) and [stack modes](docs/stack.md). Existing maps remain editable through their instance JSON/plugins.
 
@@ -70,7 +70,7 @@ Run `npm run validate` after editing. Read [configuration](docs/configuration.md
 
 ## Work with an agent
 
-Start with [AGENTS.md](AGENTS.md) and [the WebGIS skill](skills/webgis/SKILL.md). Install with `npx skills add Nikolai-prog1/webgis-kit`. Claude Code users can run `/plugin marketplace add Nikolai-prog1/webgis-kit`, then `/plugin install webgis@webgis-kit`. Manifest/discovery formats were checked against their official documentation; installation into every agent product is not an integration guarantee.
+Start with [AGENTS.md](AGENTS.md) and [the WebGIS skill](skills/webgis/SKILL.md). The kit is built and tested for Claude Code and Codex. Install with `npx skills add Nikolai-prog1/webgis-kit --skill webgis -a claude-code -a codex`; Claude Code users can instead run `/plugin marketplace add Nikolai-prog1/webgis-kit`, then `/plugin install webgis@webgis-kit`.
 
 The required cycle is edit → validate → dev server → browser verification. `npm run smoke` builds a temporary preview and checks the configured data/services and Chromium; without Chromium it reports HTTP-only verification. Use instance plugins for behavior that JSON cannot express; [plugin API](docs/plugins.md).
 

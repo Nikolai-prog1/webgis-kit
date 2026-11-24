@@ -2,20 +2,40 @@ name: Stack integration
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, 'release/**']
     paths:
+      - 'src/**'
       - 'stack/**'
-      - 'tools/import/**'
-      - 'tools/stack/**'
-      - 'tools/smoke.mjs'
+      - 'tools/**'
+      - 'examples/configs/qgis-server/**'
       - 'tests/e2e-live/**'
+      - 'tests/fixtures/**'
       - '.github/workflows/stack.yml'
 permissions:
   contents: read
+env:
+  # Shared by every server job: make the starter English and offline-safe, then
+  # import the Natural Earth demo and a Cyrillic BGS2005 (EPSG:7801) fixture.
+  PREPARE: >-
+    node --input-type=module -e "import fs from 'node:fs'; const p='app/static/config/app.json';
+    const c=JSON.parse(fs.readFileSync(p)); c.app.locale='en'; c.basemaps.default='none';
+    fs.writeFileSync(p,JSON.stringify(c,null,2));"
+  DEMO: examples/configs/demo/static/data/cities.geojson examples/configs/demo/static/data/rivers.geojson examples/configs/demo/static/data/countries.geojson tests/fixtures/region-7801.geojson
 jobs:
   docker-stack:
+    name: docker (PostGIS ${{ matrix.postgis }}, GeoServer ${{ matrix.geoserver }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { postgis: '17-3.7', geoserver: '3.0.2' }
+          - { postgis: '16-3.5', geoserver: '2.28.6' }
+          - { postgis: '13-3.1', geoserver: '2.25.7' }
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      WEBGIS_POSTGIS_IMAGE: postgis/postgis:${{ matrix.postgis }}
+      WEBGIS_GEOSERVER_IMAGE: docker.osgeo.org/geoserver:${{ matrix.geoserver }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -28,10 +48,11 @@ jobs:
       - run: npm ci --include=dev
       - run: npx playwright install --with-deps chromium
       - run: npm run stack -- up --mode docker
-      - name: Import the neutral demo into the new stack
+      - run: npm run stack -- status
+      - name: Import the demo and the projected Cyrillic fixture
         run: |
-          node --input-type=module -e "import fs from 'node:fs'; const p='app/static/config/app.json'; const c=JSON.parse(fs.readFileSync(p)); c.app.locale='en'; c.basemaps.default='none'; fs.writeFileSync(p,JSON.stringify(c,null,2));"
-          npm run import -- examples/configs/demo/static/data/cities.geojson examples/configs/demo/static/data/rivers.geojson examples/configs/demo/static/data/countries.geojson --schema ci_import
+          eval "$PREPARE"
+          npm run import -- $DEMO --schema ci_import
       - run: npm run smoke
       - run: npx playwright test --project=imported
         env:
@@ -42,7 +63,204 @@ jobs:
       - if: always()
         run: npm run stack -- down
       - uses: actions/upload-artifact@v7
-        if: failure()
+        if: always()
         with:
-          name: stack-integration-results
+          name: docker-${{ matrix.postgis }}-${{ matrix.geoserver }}
+          path: test-results/
+
+  large-data:
+    name: large data (OSM buildings of Sofia)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: sudo apt-get update -q && sudo apt-get install -y -q gdal-bin
+      - run: npm ci --include=dev
+      - run: npx playwright install --with-deps chromium
+      - name: Download OpenStreetMap buildings and clip Sofia
+        run: |
+          mkdir -p .cache/osm && cd .cache/osm
+          curl -sSfL -o bulgaria.zip https://download.geofabrik.de/europe/bulgaria-latest-free.shp.zip
+          unzip -q -o bulgaria.zip 'gis_osm_buildings_a_free_1.*'
+          ogr2ogr -f GPKG sofia_buildings.gpkg gis_osm_buildings_a_free_1.shp -nln sofia_buildings -spat 23.10 42.55 23.60 42.80
+          ogrinfo -so sofia_buildings.gpkg sofia_buildings | grep -E "Feature Count|Geometry"
+          echo "WEBGIS_IMPORT_SEARCH_VALUE=$(ogrinfo -q -sql "SELECT name FROM sofia_buildings WHERE name IS NOT NULL AND length(name) > 5 LIMIT 1" sofia_buildings.gpkg | sed -n 's/.*name (String) = //p' | head -1)" >> "$GITHUB_ENV"
+      - run: npm run stack -- up --mode docker
+      - name: Import (timed)
+        run: |
+          eval "$PREPARE"
+          start=$(date +%s)
+          npm run import -- .cache/osm/sofia_buildings.gpkg --schema osm
+          echo "Import took $(( $(date +%s) - start )) s"
+      - run: npm run smoke
+      - run: npx playwright test --project=imported
+        env:
+          WEBGIS_LIVE_GEOSERVER: '1'
+          WEBGIS_LIVE_INSTANCE: app
+          WEBGIS_LIVE_LARGE: '1'
+      - if: always()
+        run: npm run stack -- down
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: large-data
+          path: test-results/
+
+  qgis-server:
+    name: QGIS Server (${{ matrix.qgis }})
+    strategy:
+      fail-fast: false
+      matrix:
+        qgis: [ltr, stable]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: sudo apt-get update -q && sudo apt-get install -y -q gdal-bin
+      - run: npm ci --include=dev
+      - run: npx playwright install --with-deps chromium
+      - name: Build a QGIS project from the demo layers
+        run: |
+          mkdir -p .cache/qgis && cp tests/fixtures/qgis/make_project.py .cache/qgis/
+          for layer in countries rivers cities; do
+            ogr2ogr -f GPKG -update -append .cache/qgis/demo.gpkg examples/configs/demo/static/data/$layer.geojson -nln $layer
+          done
+          docker run --rm -v "$PWD/.cache/qgis:/data" -e QT_QPA_PLATFORM=offscreen qgis/qgis:${{ matrix.qgis }} \
+            python3 /data/make_project.py /data/demo.gpkg /data/demo.qgs
+      - name: Serve it with QGIS Server
+        run: |
+          docker run -d --name qgis -p 8081:8080 -v "$PWD/.cache/qgis:/data" \
+            -e QGIS_PROJECT_FILE=/data/demo.qgs -e QT_QPA_PLATFORM=offscreen \
+            -e QGIS_SERVER_LOG_STDERR=1 -e QGIS_SERVER_LOG_LEVEL=0 \
+            qgis/qgis:${{ matrix.qgis }} qgis_mapserver 0.0.0.0:8080
+          for i in $(seq 1 60); do
+            curl -sf "http://127.0.0.1:8081/ows?SERVICE=WMS&REQUEST=GetCapabilities" -o caps.xml && break
+            sleep 2
+          done
+          grep -c "<Layer" caps.xml
+          curl -sf "http://127.0.0.1:8081/ows?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetCapabilities" | grep -o "<FeatureType>" | wc -l
+      - run: npx playwright test --project=imported
+        env:
+          WEBGIS_LIVE_GEOSERVER: '1'
+          WEBGIS_LIVE_INSTANCE: examples/configs/qgis-server
+          WEBGIS_LIVE_QGIS: '1'
+          QGIS_SERVER_URL: http://127.0.0.1:8081
+      - if: always()
+        run: docker logs qgis 2>&1 | tail -200
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: qgis-server-${{ matrix.qgis }}
+          path: test-results/
+
+  macos-existing:
+    name: macOS with Homebrew PostGIS and GeoServer (existing mode)
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install PostgreSQL and PostGIS with Homebrew
+        run: |
+          brew install postgis
+          PG=$(brew deps postgis | grep -o '^postgresql@[0-9]*' | head -1)
+          echo "Using $PG"
+          echo "$(brew --prefix $PG)/bin" >> "$GITHUB_PATH"
+      - name: Start PostgreSQL with an application role
+        run: |
+          initdb -D "$RUNNER_TEMP/pg" -U postgres --auth=trust -E UTF8 > /dev/null
+          pg_ctl -D "$RUNNER_TEMP/pg" -o "-p 5432" -l "$RUNNER_TEMP/pg.log" -w start
+          psql -U postgres -c "CREATE ROLE webgis LOGIN PASSWORD 'ci-only-password'"
+          psql -U postgres -c "CREATE DATABASE webgis OWNER webgis"
+          psql -U postgres -d webgis -c "CREATE EXTENSION postgis"
+      - name: Start GeoServer from the official binary
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/gs.zip" https://sourceforge.net/projects/geoserver/files/GeoServer/3.0.2/geoserver-3.0.2-bin.zip/download
+          unzip -q "$RUNNER_TEMP/gs.zip" -d "$RUNNER_TEMP/geoserver"
+          export GEOSERVER_HOME="$RUNNER_TEMP/geoserver"
+          nohup sh "$GEOSERVER_HOME/bin/startup.sh" > "$RUNNER_TEMP/gs.log" 2>&1 &
+          for i in $(seq 1 90); do curl -sf -u admin:geoserver http://localhost:8080/geoserver/rest/about/version.json && break; sleep 2; done
+      - run: npm ci --include=dev
+      - run: npx playwright install chromium
+      - name: Connect the kit to the existing servers
+        run: |
+          printf '%s\n' WEBGIS_DB_HOST=localhost WEBGIS_DB_PORT=5432 WEBGIS_DB_NAME=webgis WEBGIS_DB_USER=webgis \
+            WEBGIS_DB_PASSWORD=ci-only-password GEOSERVER_URL=http://localhost:8080/geoserver \
+            GEOSERVER_USER=admin GEOSERVER_PASSWORD=geoserver > .env
+          npm run stack -- up --mode existing
+          npm run stack -- status
+      - name: Import
+        run: |
+          eval "$PREPARE"
+          npm run import -- $DEMO --schema ci_import
+      - run: npm run smoke
+      - run: npx playwright test --project=imported
+        env:
+          WEBGIS_LIVE_GEOSERVER: '1'
+          WEBGIS_LIVE_INSTANCE: app
+          GEOSERVER_URL: http://localhost:8080
+      - if: failure()
+        run: tail -100 "$RUNNER_TEMP/gs.log" "$RUNNER_TEMP/pg.log"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: macos-existing
+          path: test-results/
+
+  windows-portable:
+    name: Windows portable stack (no Docker, no administrator)
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: npm ci --include=dev
+      - run: npx playwright install chromium
+      - run: npm run stack -- up --mode portable
+      - run: npm run stack -- status
+      - name: Import
+        run: |
+          eval "$PREPARE"
+          npm run import -- $DEMO --schema ci_import
+      - run: npm run smoke
+      - run: npx playwright test --project=imported
+        env:
+          WEBGIS_LIVE_GEOSERVER: '1'
+          WEBGIS_LIVE_INSTANCE: app
+      - if: always()
+        run: npm run stack -- down
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-portable
           path: test-results/

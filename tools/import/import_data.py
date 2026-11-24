@@ -90,7 +90,7 @@ def ogr(settings):
         return ['docker', 'run', '--rm', '-i', '-v', f'{Path.cwd().anchor or "/"}:/host:ro', 'ghcr.io/osgeo/gdal:ubuntu-small-latest', 'ogr2ogr'], environment
     raise RuntimeError('GeoPackage/Shapefile or projected GeoJSON needs ogr2ogr. Set WEBGIS_OGR2OGR, install GDAL/QGIS, or use --target geojson with EPSG:4326 GeoJSON.')
 
-def convert(file, settings, layer=None, target_crs=None):
+def convert(file, settings, layer=None, target_crs=None, source_srs=None):
     tool, environment = ogr(settings)
     source = str(file)
     if tool[0] == 'docker':
@@ -99,8 +99,24 @@ def convert(file, settings, layer=None, target_crs=None):
         source = '/input/' + file.name
     args = tool + ['-preserve_fid', '-f', 'GeoJSON', '/vsistdout/', source]
     if layer: args.append(layer)
+    if source_srs: args += ['-s_srs', source_srs]
     if target_crs: args += ['-t_srs', f'EPSG:{target_crs}']
     return json.loads(command(args, environment))
+
+def parse_srs(value):
+    """--srs: an EPSG code (7801, EPSG:7801) or anything GDAL reads (.prj/.wkt file, WKT, PROJ string)."""
+    if not value: return None, None
+    match = re.fullmatch(r'(?:EPSG:)?(\d+)', value.strip(), re.I)
+    if match: return int(match[1]), f'EPSG:{match[1]}'
+    path = Path(value)
+    return None, (str(path.resolve()) if path.is_file() else value)
+
+def geographic(features):
+    xy = [v for f in features for v in positions(f.get('geometry'))]
+    return all(-180 <= v[0] <= 180 and -90 <= v[1] <= 90 for v in xy)
+
+PROJECTED_HINT = ('Pass the source coordinate system with --srs: an EPSG code (for example --srs EPSG:7801 for BGS2005, '
+                  '--srs EPSG:32635 for UTM 35N) or the dataset\'s .prj file (--srs path/to/file.prj).')
 
 def inputs(paths):
     for value in paths:
@@ -110,7 +126,9 @@ def inputs(paths):
             yield from inputs([str(child) for child in sorted(file.iterdir()) if child.suffix.lower() in ('.geojson','.json','.gpkg','.shp')])
         elif file.suffix.lower() == '.gpkg':
             with closing(sqlite3.connect(f'{file.resolve().as_uri()}?mode=ro', uri=True)) as db:
-                layers = db.execute('SELECT table_name,srs_id FROM gpkg_geometry_columns').fetchall()
+                # Only EPSG-registered systems keep their code; any other system is reprojected through GDAL.
+                layers = db.execute("SELECT g.table_name, CASE WHEN upper(s.organization) = 'EPSG' THEN s.organization_coordsys_id END "
+                                    "FROM gpkg_geometry_columns g LEFT JOIN gpkg_spatial_ref_sys s ON s.srs_id = g.srs_id").fetchall()
             found = False
             for layer, srid in layers:
                 if selected is None or selected == layer:
@@ -131,23 +149,41 @@ def positions(geometry):
             for child in values: yield from walk(child)
     yield from walk(geometry.get('coordinates', []))
 
-def dataset(file, layer=None, srid=None, settings=None, prefix='', used=None, target='postgis'):
+def dataset(file, layer=None, srid=None, settings=None, prefix='', used=None, target='postgis', srs=None):
     settings = settings or {}
     native_primary = None
     if file.suffix.lower() == '.gpkg' and layer:
         with closing(sqlite3.connect(f'{file.resolve().as_uri()}?mode=ro',uri=True)) as database:
             native_primary = next((row[1] for row in database.execute(f'PRAGMA table_info({ident(layer)})') if row[5]),None)
-    data = (json.loads(file.read_text(encoding='utf-8-sig')) if file.suffix.lower() in ('.json','.geojson') else convert(file, settings, layer))
+    geojson_input = file.suffix.lower() in ('.json','.geojson')
+    override_srid, override = parse_srs(srs)
+    data = json.loads(file.read_text(encoding='utf-8-sig')) if geojson_input else convert(file, settings, layer)
     crs = data.get('crs', {}).get('properties', {}).get('name', '')
-    if not srid:
+    if override:
+        # The user's statement of the source system wins over any declaration in the file.
+        srid = override_srid
+        if srid is None or target == 'geojson':
+            data = convert(file, settings, layer, 4326, override); srid = 4326
+        elif srid != 4326 and geojson_input: data['crs'] = {'type':'name','properties':{'name':override}}
+    elif not srid:
         found = re.search(r'(\d+)$', crs) if 'EPSG' in crs.upper() else None
         if crs and not found and 'CRS84' not in crs.upper():
-            raise ValueError('Source CRS must have a known EPSG code before import.')
-        srid = int(found[1]) if found else 4326
-        if not crs: print(f'Warning: {file.name}: CRS unspecified; using EPSG:4326.', file=sys.stderr)
+            # A system without an EPSG code (local or historical): GDAL reprojects it to WGS84.
+            data = convert(file, settings, layer, 4326); srid = 4326
+            print(f'Note: {file.name}: {crs} has no EPSG code; reprojected to EPSG:4326.', file=sys.stderr)
+        else:
+            srid = int(found[1]) if found else 4326
+            if not crs and not geojson_input and not geographic(data.get('features') or []):
+                # GDAL found a .prj without an EPSG code; let it reproject from that definition.
+                try: data = convert(file, settings, layer, 4326)
+                except RuntimeError as error: raise ValueError(f'{file.name}: coordinates are projected but the source system is unknown. {PROJECTED_HINT}') from error
+                print(f'Note: {file.name}: source system has no EPSG code; reprojected to EPSG:4326.', file=sys.stderr)
+            elif not crs and geographic(data.get('features') or []): print(f'Note: {file.name}: no CRS declared; longitude/latitude (EPSG:4326) assumed.', file=sys.stderr)
     if not isinstance(srid, int) or srid <= 0: raise ValueError('A positive EPSG SRID is required.')
     if target == 'geojson' and srid != 4326:
-        data = convert(file, settings, layer, 4326); srid = 4326
+        data = convert(file, settings, layer, 4326, override); srid = 4326
+    if srid == 4326 and not geographic(data.get('features') or [data]):
+        raise ValueError(f'{file.name}: coordinates are outside longitude/latitude ranges, so the data are projected. {PROJECTED_HINT}')
     features = data.get('features') if data.get('type') == 'FeatureCollection' else [data]
     if not isinstance(features, list) or any(feature.get('type') != 'Feature' for feature in features):
         raise ValueError('Expected GeoJSON Feature or FeatureCollection.')
@@ -268,8 +304,8 @@ def configure(config, items, target, service, workspace, section=None, search='a
         if any(key not in item['fields'] for key in selected): raise ValueError('Search field is missing from the imported data.')
         title_field = (preferred or text_fields or [item['primary']])[0]
         layer['popup'] = {'title':'{' + title_field + '}'}
-        if selected: add_block({'type':'attribute-search','layer':layer_id,'fields':selected,'label':item['title'],
-                                'placeholder':', '.join(item['fields'][key]['label'] for key in selected),'result':{'title':'{'+title_field+'}'},'maxZoom':14})
+        # Label and placeholder are left to the map: it shows the layer title and field labels, so renaming them relabels the search.
+        if selected: add_block({'type':'attribute-search','layer':layer_id,'fields':selected,'result':{'title':'{'+title_field+'}'},'maxZoom':14})
         controls = []
         if filters == 'auto' and not few:
             for key,field in item['fields'].items():
@@ -297,6 +333,7 @@ def fit_view(config, items):
     view['center'] = [round((west + east) / 2, 6), round((south + north) / 2, 6)]
     view['zoom'] = max(2, min(16, math.floor(math.log2(900 / (256 * span)))))
     view['homeExtent'] = [round(v, 6) for v in (west, south, east, north)]
+    view['openAtHome'] = True
 
 def atomic_write(file, data):
     file.parent.mkdir(parents=True, exist_ok=True)
@@ -322,7 +359,7 @@ def import_data(args):
     target = args.target or ('postgis' if settings.get('WEBGIS_DB_NAME') or project(instance).get('mode') in ('existing','portable','docker') else 'geojson')
     if not re.fullmatch('[a-z_][a-z0-9_]{0,53}', args.schema): raise ValueError('Schema must be an ASCII SQL name (lowercase letters, digits, underscores).')
     taken = set()
-    items = [dataset(file,layer,srid,settings,args.prefix,taken,target) for file,layer,srid in inputs(args.inputs)]
+    items = [dataset(file,layer,srid,settings,args.prefix,taken,target,getattr(args,'srs',None)) for file,layer,srid in inputs(args.inputs)]
     if not items: raise ValueError('No supported vector inputs were found.')
     services = config.setdefault('services', {})
     service = next((key for key,value in services.items() if value['type'] == 'geoserver'), 'main')
@@ -454,6 +491,7 @@ def main():
     parser.add_argument('--search',default='auto')
     parser.add_argument('--filter',choices=['auto','none'],default='auto')
     parser.add_argument('--section')
+    parser.add_argument('--srs',help='Source coordinate system when the data do not declare it: EPSG code, .prj/.wkt file, WKT or PROJ string')
     parser.add_argument('--dry-run',action='store_true')
     try: import_data(parser.parse_args())
     except (ValueError,RuntimeError,OSError,sqlite3.Error) as error:

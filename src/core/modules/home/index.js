@@ -22,7 +22,7 @@ export default {
           );
         else
           ctx.view.animate({
-            center: fromLonLat(ctx.config.map.center),
+            center: fromLonLat(ctx.config.map.center, ctx.view.getProjection()),
             zoom: ctx.config.map.zoom,
             duration,
           });

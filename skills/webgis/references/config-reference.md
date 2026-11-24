@@ -38,6 +38,8 @@ Generated from the shipped JSON Schemas. Run `npm run reference` after changing 
 | `map.extent[]` | number | no |
 | `map.homeExtent` | array or null | no |
 | `map.homeExtent[]` | number | no |
+| `map.openAtHome` | boolean | no |
+| `map.projection` | string | no |
 | `crs` | array | no |
 | `crs[]` | object | no |
 | `crs[].code` | string | yes |

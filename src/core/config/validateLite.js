@@ -37,6 +37,16 @@ export function validateLite(config) {
     if (!['EPSG:4326', 'EPSG:3857'].includes(item.code) && !item.proj4)
       error(`crs.${item.code}.proj4`, 'required for a custom CRS');
   }
+  const projection = config.map?.projection;
+  if (projection && !['EPSG:4326', 'EPSG:3857'].includes(projection)) {
+    const item = config.crs.find((entry) => entry.code === projection);
+    if (!item) error('map.projection', 'add this CRS to crs[] first');
+    else if (!item.bbox)
+      error(
+        `crs.${projection}.bbox`,
+        'required when the map uses this projection (its valid area, in its own units)',
+      );
+  }
   function checkUrl(value, path) {
     try {
       if (

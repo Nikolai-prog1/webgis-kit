@@ -1,0 +1,201 @@
+{
+  "$schema": "../../../../../src/core/config/schema/app.schema.json",
+  "version": 1,
+  "app": {
+    "id": "qgis-server-example",
+    "title": "QGIS Server example",
+    "locale": "en",
+    "locales": ["en", "bg"]
+  },
+  "branding": {
+    "title": "QGIS Server example"
+  },
+  "map": {
+    "center": [12, 45],
+    "zoom": 3
+  },
+  "basemaps": {
+    "default": "none",
+    "allowNone": true,
+    "items": [
+      {
+        "id": "osm",
+        "type": "osm",
+        "title": "OpenStreetMap"
+      }
+    ]
+  },
+  "services": {
+    "qgis": {
+      "type": "wms",
+      "url": "qgis/ows",
+      "serverType": "qgis",
+      "wmsVersion": "1.3.0",
+      "title": "QGIS Server"
+    },
+    "qgis-wfs": {
+      "type": "wfs",
+      "url": "qgis/ows",
+      "wfsVersion": "1.1.0",
+      "title": "QGIS Server WFS"
+    }
+  },
+  "layers": [
+    {
+      "id": "countries",
+      "title": "Countries",
+      "geometry": "polygon",
+      "source": {
+        "type": "wms",
+        "service": "qgis",
+        "layers": "countries"
+      },
+      "query": {
+        "service": "qgis-wfs",
+        "typeName": "countries"
+      },
+      "visible": true,
+      "queryable": true,
+      "table": true,
+      "fields": {
+        "name": {
+          "label": "Name"
+        },
+        "country": {
+          "label": "Country"
+        },
+        "population": {
+          "label": "Population",
+          "format": "number"
+        },
+        "continent": {
+          "label": "Continent"
+        },
+        "tags": {
+          "hidden": true,
+          "label": "Tags"
+        },
+        "tags_filter": {
+          "hidden": true,
+          "label": "Tags filter"
+        },
+        "fid": {
+          "hidden": true,
+          "label": "fid"
+        }
+      },
+      "popup": {
+        "title": "{name}"
+      }
+    },
+    {
+      "id": "rivers",
+      "title": "Rivers",
+      "geometry": "line",
+      "source": {
+        "type": "wms",
+        "service": "qgis",
+        "layers": "rivers"
+      },
+      "query": {
+        "service": "qgis-wfs",
+        "typeName": "rivers"
+      },
+      "visible": true,
+      "queryable": true,
+      "table": true,
+      "fields": {
+        "name": {
+          "label": "Name"
+        },
+        "fid": {
+          "hidden": true,
+          "label": "fid"
+        }
+      },
+      "popup": {
+        "title": "{name}"
+      }
+    },
+    {
+      "id": "cities",
+      "title": "Cities",
+      "geometry": "point",
+      "source": {
+        "type": "wms",
+        "service": "qgis",
+        "layers": "cities"
+      },
+      "query": {
+        "service": "qgis-wfs",
+        "typeName": "cities"
+      },
+      "visible": true,
+      "queryable": true,
+      "table": true,
+      "fields": {
+        "name": {
+          "label": "Name"
+        },
+        "country": {
+          "label": "Country"
+        },
+        "population": {
+          "label": "Population",
+          "format": "number"
+        },
+        "fid": {
+          "hidden": true,
+          "label": "fid"
+        }
+      },
+      "popup": {
+        "title": "{name}"
+      }
+    }
+  ],
+  "sidebar": [
+    {
+      "id": "data",
+      "title": {
+        "en": "Data",
+        "bg": "Данни"
+      },
+      "open": true,
+      "blocks": [
+        {
+          "type": "basemap-switcher"
+        },
+        {
+          "type": "layer-list",
+          "layers": ["countries", "rivers", "cities"]
+        },
+        {
+          "type": "attribute-search",
+          "layer": "cities",
+          "fields": ["name", "country"]
+        },
+        {
+          "type": "attribute-filter",
+          "layer": "cities",
+          "controls": [
+            {
+              "type": "range",
+              "field": "population"
+            },
+            {
+              "type": "select",
+              "field": "country",
+              "values": "auto"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "toolbar": ["measure-distance", "goto-coordinates", "home", "print", "clear"],
+  "statusBar": {
+    "coordinates": ["EPSG:4326"],
+    "scaleLine": true
+  }
+}

@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// Search boxes without their own label show the layer title.
+const text = (value) => (typeof value === 'string' ? value : value.en);
+
 test('imported Cyrillic text matches case variants through server-side search', async ({
   page,
 }) => {
@@ -21,7 +24,7 @@ test('imported Cyrillic text matches case variants through server-side search', 
       (block) => block.type === 'attribute-search' && block.layer === layer.id,
     );
   const input = page.getByRole('searchbox', {
-    name: typeof block.label === 'string' ? block.label : block.label.en,
+    name: text(block.label ?? layer.title),
     exact: true,
   });
   const form = input.locator('xpath=ancestor::form');
@@ -47,8 +50,10 @@ test('an imported layer renders with identify, table and automatic search/filter
   page,
 }, testInfo) => {
   test.skip(
-    !process.env.WEBGIS_LIVE_INSTANCE,
-    'Requires an explicitly selected imported instance.',
+    !process.env.WEBGIS_LIVE_INSTANCE ||
+      process.env.WEBGIS_LIVE_QGIS === '1' ||
+      process.env.WEBGIS_LIVE_LARGE === '1',
+    'Requires an explicitly selected imported GeoServer instance.',
   );
   const errors = [];
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -79,7 +84,7 @@ test('an imported layer renders with identify, table and automatic search/filter
       (block) => block.type === 'attribute-search' && block.layer === layer.id,
     );
   expect(block).toBeTruthy();
-  const label = typeof block.label === 'string' ? block.label : block.label.en;
+  const label = text(block.label ?? layer.title);
   const input = page.getByRole('searchbox', { name: label, exact: true });
   await input.fill(process.env.WEBGIS_IMPORT_SEARCH_VALUE || 'London');
   const form = input.locator('xpath=ancestor::form');
